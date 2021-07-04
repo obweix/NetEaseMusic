@@ -1,0 +1,16 @@
+bottom_widget.o
+main.o
+mainwindow.o
+middle_widget.o
+phonograph_widget.o
+play_widget.o
+playlist_widget.o
+top_widget.o
+qrc_res.o
+moc_bottom_widget.o
+moc_mainwindow.o
+moc_middle_widget.o
+moc_phonograph_widget.o
+moc_play_widget.o
+moc_playlist_widget.o
+moc_top_widget.o
