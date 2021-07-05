@@ -117,14 +117,10 @@ void AlbumWidget::init()
         if(_isShowPlaylist)
         {         
            showPlayWidget();
-           _playlistWidget->hide();
-
            _isShowPlaylist = false;
         }
         else{           
             showPlaylistWidget();
-            _playWidget->hide();
-
             _isShowPlaylist = true;
         }
 
@@ -147,6 +143,7 @@ void AlbumWidget::moveWidget(QPropertyAnimation& animation,
 void AlbumWidget::showPlayWidget()
 {
     _playWidget->show();
+    _playWidget->raise();
 
     QPoint gp;
     gp = _btnAlbumCover->mapTo(_mainWindowHandle,QPoint(0,0));
@@ -166,10 +163,8 @@ void AlbumWidget::showPlayWidget()
 
 void AlbumWidget::showPlaylistWidget()
 {
-    _playlistWidget->show();
-
     QPoint gp;
-    gp = _btnAlbumCover->mapTo(_mainWindowHandle,QPoint(0,0));
+    gp = _btnAlbumCover->mapTo(MainWindowHandle::getInstance().getHandle(),QPoint(0,0));
     QRect to(gp.x(),gp.y(),_btnAlbumCover->width(),_btnAlbumCover->height());
 
     QRect from = QRect(0,
@@ -181,6 +176,8 @@ void AlbumWidget::showPlaylistWidget()
     qDebug()<<"2to:"<<to.x()<<to.y()<<to.width()<<to.height();
 
     moveWidget(_animationShowPlaylistWidget,_playWidget,from,to);
+
+    _playlistWidget->show();
 }
 
 

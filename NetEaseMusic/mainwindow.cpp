@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     setLayout(vLayout);
 
+    MainWindowHandle::getInstance().setHandle(this);
+
 }
 
 

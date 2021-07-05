@@ -12,6 +12,8 @@ MiddleWidget::MiddleWidget(QWidget* parent):QWidget(parent)
 
 void MiddleWidget::init()
 {
+
+
     QHBoxLayout* hl = new QHBoxLayout();
     _playWidget = new PlayWidget(this);
     _playlistWidget = new PlaylistWidget(this);
