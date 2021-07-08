@@ -2,6 +2,7 @@
 #include "play_widget.h"
 #include "playlist_widget.h"
 #include "middle_widget.h"
+#include "mainwindowhandle.h"
 #include "mainwindow.h"
 
 #include <QPushButton>

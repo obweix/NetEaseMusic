@@ -6,6 +6,8 @@
 #include "middle_widget.h"
 #include "bottom_widget.h"
 
+#include "mainwindowhandle.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
 {
@@ -29,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     setLayout(vLayout);
 
     MainWindowHandle::getInstance().setHandle(this);
+    MainWindowHandle::getInstance().setSkin();
 
 }
 

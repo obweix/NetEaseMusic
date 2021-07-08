@@ -19,19 +19,23 @@ SOURCES += \
     bottom_widget.cpp \
     main.cpp \
     mainwindow.cpp \
+    mainwindowhandle.cpp \
     middle_widget.cpp \
     phonograph_widget.cpp \
     play_widget.cpp \
     playlist_widget.cpp \
+    skin_config.cpp \
     top_widget.cpp
 
 HEADERS += \
     bottom_widget.h \
     mainwindow.h \
+    mainwindowhandle.h \
     middle_widget.h \
     phonograph_widget.h \
     play_widget.h \
     playlist_widget.h \
+    skin_config.h \
     top_widget.h
 
 FORMS += \

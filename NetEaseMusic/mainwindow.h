@@ -15,33 +15,7 @@ class MainWindow;
 class MainWindowHandle; //单例，获取主窗口句柄
 QT_END_NAMESPACE
 
-class MainWindowHandle
-{
-public:
-    static MainWindowHandle& getInstance()
-    {
-        static MainWindowHandle mainWinHandIns;
-        return mainWinHandIns;
-    }
 
-    void setHandle(MainWindow* handle){
-        _mainWinHand = handle;
-    }
-
-    MainWindow* getHandle(){
-        if(_mainWinHand){
-            return  _mainWinHand;
-        }
-        return nullptr;
-    }
-private:
-    MainWindow* _mainWinHand;
-
-private:
-    MainWindowHandle(){};
-    MainWindowHandle(const MainWindowHandle& wndHand) = delete ;
-    MainWindowHandle& operator=(const MainWindowHandle& wndHand) = delete;
-};
 
 class MainWindow : public QWidget
 {
