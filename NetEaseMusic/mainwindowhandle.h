@@ -15,6 +15,12 @@ public:
 
     void setSkin(const QString skinName="");
 
+    void close();
+
+    void max();
+
+    void min();
+
 private:
     MainWindow* _mainWinHand;
 
@@ -24,6 +30,8 @@ private:
     MainWindowHandle& operator=(const MainWindowHandle& wndHand) = delete;
 
     bool isSetHandle();
+
+    bool _isMax = false;
 };
 
 #endif // MAINWINDOWHANDLE_H

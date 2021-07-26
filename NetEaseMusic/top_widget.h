@@ -15,6 +15,7 @@ public:
 
 private:
     void init();
+    void initConnect();
 
 private:
     QPushButton* _btnLogo;
@@ -25,6 +26,8 @@ private:
     QPushButton* _btnMin;
     QPushButton* _btnMax;
     QPushButton* _btnClose;
+
+
 
 
 

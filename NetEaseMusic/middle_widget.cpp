@@ -14,18 +14,28 @@ void MiddleWidget::init()
 {
 
 
-    QHBoxLayout* hl = new QHBoxLayout();
-    _playWidget = new PlayWidget(this);
+    QHBoxLayout* hl = new QHBoxLayout(this);
+
+    hl->setObjectName("middleWidgetLayout");
+    hl->setMargin(0);
+    hl->setSpacing(0);
     _playlistWidget = new PlaylistWidget(this);
+    _playlistWidget->setObjectName("playlistWidget");
+    _playWidget = new PlayWidget(this);
+    _playWidget->setObjectName("playWidget");
+
 
     //_playWidget->hide();
-    _playlistWidget->hide();
-
 
     hl->addWidget(_playlistWidget);
     hl->addWidget(_playWidget);
+    _playWidget->show();
+    _playWidget->raise();
 
     setLayout(hl);
+
+    _playlistWidget->hide();
+
 }
 
 PlayWidget* MiddleWidget::getPlayWidget()

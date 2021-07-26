@@ -133,9 +133,9 @@
         <file>res/image/view_music_hover_white.png</file>
         <file>res/image/view_music_normal_black.png</file>
         <file>res/image/view_music_normal_white.png</file>
-        <file>res/css/black.css</file>
         <file>res/css/netease-red.css</file>
         <file>res/css/red.css</file>
         <file>res/test/test.txt</file>
+        <file>res/css/black.css</file>
     </qresource>
 </RCC>

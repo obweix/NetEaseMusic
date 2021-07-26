@@ -36,14 +36,46 @@ void MainWindowHandle::setSkin(const QString skinName)
 
     QString skinConfig = SkinConfig::getInstance().getConfig();
 
-    QFile file(QString(":/res/css/black.css")); // todo:判读文件是否存在
+    QFile file(QString(":/res/css/black.css"));
     if(true == file.open(QFile::ReadOnly))
     {
         QTextStream textStream(&file);
         QString styleSheet = textStream.readAll();
+        qDebug()<<styleSheet<<endl;
         file.close();
         _mainWinHand->setStyleSheet(styleSheet);
         qDebug()<<"set skin"<<endl;
     }
+
+}
+
+void MainWindowHandle::close()
+{
+    _mainWinHand->close();
+}
+
+void MainWindowHandle::max()
+{
+    if(_isMax){
+        //_mainWinHand->resize(1022,670);
+        _mainWinHand->showNormal();
+        _isMax = false;
+    }else{
+        _mainWinHand->showMaximized();
+
+//        QRect availableGeometry(QGuiApplication::screens().first()->availableGeometry());
+//        _mainWinHand->setGeometry(availableGeometry);
+        _isMax = true;
+    }
+
+}
+
+void MainWindowHandle::min()
+{
+    if(!isSetHandle()){
+        return;
+    }
+
+    _mainWinHand->showMinimized();
 
 }

@@ -23,23 +23,51 @@ PlayCtrlWidget::PlayCtrlWidget(QWidget *parent):QWidget(parent)
 
 void PlayCtrlWidget::init()
 {
-    _playCtrlWidgetContainer = new QWidget(this);
+    QVBoxLayout *vl = new QVBoxLayout();
+    QHBoxLayout *hlCtrlBtn = new QHBoxLayout();
+    QHBoxLayout *hlProgressBar = new QHBoxLayout();
 
-    QVBoxLayout *vl = new QVBoxLayout(_playCtrlWidgetContainer);
-    QHBoxLayout *hlCtrlBtn = new QHBoxLayout(_playCtrlWidgetContainer);
-    QHBoxLayout *hlProgressBar = new QHBoxLayout(_playCtrlWidgetContainer);
+    _btnPrevSong = new QPushButton();
+    _btnPauseOrPlay = new QPushButton();
+    _btnNextSong = new QPushButton();
+    _btnPrevSong->setObjectName("btnPreSong");
+    _btnPauseOrPlay->setObjectName("btnPlayOrPause");
+    _btnNextSong->setObjectName("btnNextSong");
 
-    _btnPrevSong = new QPushButton("<",_playCtrlWidgetContainer);
-    _btnPauseOrPlay = new QPushButton("||",_playCtrlWidgetContainer);
-    _btnNextSong = new QPushButton(">",_playCtrlWidgetContainer);
+//    _btnPrevSong->setMaximumWidth(32);
+//    _btnPauseOrPlay->setMaximumWidth(40);
+//    _btnNextSong->setMaximumWidth(32);
 
-    _btnPrevSong->setMaximumWidth(30);
-    _btnPauseOrPlay->setMaximumWidth(30);
-    _btnNextSong->setMaximumWidth(30);
+    _sldProgressBar = new QSlider(Qt::Horizontal);
+    _sldProgressBar->setStyleSheet(
+                "QSlider{"
+                    "background: #cccccc;"
+                    "height: 6px;"
+                     "border-radius: 2px;"
+                "} "
 
-    _sldProgressBar = new QSlider(Qt::Horizontal,_playCtrlWidgetContainer);
-    _lbCurrentProgress = new QLabel("02:12",_playCtrlWidgetContainer);
-    _lbSongLength = new QLabel("04:28",_playCtrlWidgetContainer);
+                "QSlider::sub-page:horizontal {"
+                    "height: 6px; "
+                    "border-radius: 2px;"
+                    "background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ff3344, stop:1 #CC0033); "
+                "}"
+
+                "QSlider::handle:horizontal {"
+                    "height: 10px;"
+                    "width: 14px; "
+                    "margin-top: -5px;"
+                    "margin-bottom: -5px; "
+                    "border-radius: 7px;"
+                    "border: 1px solid #cccccc;"
+                    "background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,stop:0.25 #CC0033, stop:0.4 #fefefe);"
+                "}"
+                "QSlider::handle:horizontal:hover {"
+                    "border: 1px solid #aaaaaa;"
+                    "background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,stop:0.3 #CC0033, stop:0.45 #fefefe);"
+                "}"
+                );
+    _lbCurrentProgress = new QLabel("02:12");
+    _lbSongLength = new QLabel("04:28");
 
 
 
@@ -75,8 +103,50 @@ void VolumeCtrlWidget::init()
 {
     QHBoxLayout* hl = new QHBoxLayout();
 
-    _btnMute = new QPushButton("mute");
+    _btnMute = new QPushButton();
+    _btnMute->setStyleSheet("QPushButton{"
+                                "width:22px;"
+                                "height:22px;"
+                                "background-color:rgba(0, 0, 0, 0);"
+                                "background-image:url(:/res/image/sound_normal_black.png);"
+                                "background-repeat:no-repeat;"
+                            "}"
+                            "QPushButton:hover{"
+                                    "width:22px;"
+                                    "height:22px;"
+                                    "background-color:rgba(0, 0, 0, 0);"
+                                    "background-image:url(:/res/image/sound_hover_black.png);"
+                                    "background-repeat:no-repeat;"
+                            "}"
+                            "");
     _sldVolume = new QSlider(Qt::Horizontal);
+    _sldVolume->setStyleSheet(
+                "QSlider{"
+                    "background: #cccccc;"
+                    "height: 4px;"
+                     "border-radius: 1px;"
+                "} "
+
+                "QSlider::sub-page:horizontal {"
+                    "height: 4px; "
+                    "border-radius: 1px;"
+                    "background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ff3344, stop:1 #CC0033); "
+                "}"
+
+                "QSlider::handle:horizontal {"
+                    "height: 10px;"
+                    "width: 14px; "
+                    "margin-top: -5px;"
+                    "margin-bottom: -5px; "
+                    "border-radius: 7px;"
+                    "border: 1px solid #cccccc;"
+                    "background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,stop:0.25 #CC0033, stop:0.4 #fefefe);"
+                "}"
+                "QSlider::handle:horizontal:hover {"
+                    "border: 1px solid #aaaaaa;"
+                    "background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,stop:0.3 #CC0033, stop:0.45 #fefefe);"
+                "}"
+                );
 
     hl->addWidget(_btnMute);
     hl->addWidget(_sldVolume);
@@ -99,12 +169,14 @@ AlbumWidget::AlbumWidget(QWidget *parent,MiddleWidget *mdiileWidgetHandle,MainWi
 
 void AlbumWidget::init()
 {
+
     QVBoxLayout* vl = new QVBoxLayout();
     QHBoxLayout* hl = new QHBoxLayout();
 
     _lbSongName  = new QLabel("my love");
     _lbSingerName = new QLabel("田馥甄");
     _btnAlbumCover = new QPushButton("cover");
+    _btnAlbumCover->setObjectName("btnAlbumCover");
 
     vl->addWidget(_lbSongName);
     vl->addWidget(_lbSingerName);
@@ -114,13 +186,18 @@ void AlbumWidget::init()
 
     setLayout(hl);
 
+    initConnect();
+}
+
+void AlbumWidget::initConnect()
+{
     connect(_btnAlbumCover,&QPushButton::clicked,[=](){
         if(_isShowPlaylist)
-        {         
+        {
            showPlayWidget();
            _isShowPlaylist = false;
         }
-        else{           
+        else{
             showPlaylistWidget();
             _isShowPlaylist = true;
         }
@@ -144,7 +221,7 @@ void AlbumWidget::moveWidget(QPropertyAnimation& animation,
 void AlbumWidget::showPlayWidget()
 {
     _playWidget->show();
-    _playWidget->raise();
+    //_playWidget->raise();
 
     QPoint gp;
     gp = _btnAlbumCover->mapTo(_mainWindowHandle,QPoint(0,0));
@@ -194,11 +271,24 @@ BottomWidget::BottomWidget(QWidget *parent,MiddleWidget *middleWidgetHandle,Main
 
 void BottomWidget::init()
 {
-    QHBoxLayout* hl = new QHBoxLayout();
+    QWidget* bottomWidgetContainer = new QWidget(this);
+    QHBoxLayout* hlContainer = new QHBoxLayout(this);
+    hlContainer->setObjectName("bottomWidgetHlCon");
+    bottomWidgetContainer->setObjectName("bottomWidgetContainer");
+    bottomWidgetContainer->setStyleSheet("background-color:#212124;");
+    hlContainer->setMargin(0);
+    hlContainer->setSpacing(0);
 
-    _albumWidget = new AlbumWidget(this,_middleWidgetHandle,_mainWindowHandle);
-    _playCtrlWidget = new PlayCtrlWidget();
-    _volumeCtrlWidget = new VolumeCtrlWidget();
+
+    QHBoxLayout* hl = new QHBoxLayout(bottomWidgetContainer);
+    hl->setObjectName("bottomWidgetHl");
+
+    _albumWidget = new AlbumWidget(bottomWidgetContainer,_middleWidgetHandle,_mainWindowHandle);
+    _playCtrlWidget = new PlayCtrlWidget(bottomWidgetContainer);
+    _volumeCtrlWidget = new VolumeCtrlWidget(bottomWidgetContainer);
+    _albumWidget->setObjectName("albumWidget");
+    _playCtrlWidget->setObjectName("playCtrlWidget");
+    _volumeCtrlWidget->setObjectName("volumeCtrlWidget");
 
 
     hl->addWidget(_albumWidget);
@@ -207,5 +297,7 @@ void BottomWidget::init()
     hl->addStretch(1);
     hl->addWidget(_volumeCtrlWidget);
 
-    setLayout(hl);
+    hlContainer->addWidget(bottomWidgetContainer);
+    setLayout(hlContainer);
+    //setLayout(hl);
 }

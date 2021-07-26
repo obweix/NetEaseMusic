@@ -83,6 +83,8 @@ public:
 private:
     void init();
 
+    void initConnect();
+
     void moveWidget(QPropertyAnimation& animation,
                     QWidget* widget,
                     QRect from,
@@ -126,6 +128,7 @@ public:
 
 private:
     void init();
+
 
 private:
     AlbumWidget* _albumWidget;

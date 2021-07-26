@@ -1,5 +1,7 @@
 #include "top_widget.h"
+#include "mainwindowhandle.h"
 #include <QtWidgets>
+
 TopWidget::TopWidget(QWidget *parent) : QWidget(parent)
 {
     init();
@@ -7,25 +9,66 @@ TopWidget::TopWidget(QWidget *parent) : QWidget(parent)
 
 void TopWidget::init()
 {
-    QHBoxLayout *hLayout = new QHBoxLayout();
+    QWidget* topWidgetContainer = new QWidget(this);
+    topWidgetContainer->setObjectName("topWidgetContainer");
 
-    _btnLogo = new QPushButton("logo");
-    _btnSkinBox = new QPushButton("skin");
-    _btnSetting = new QPushButton("setting");
-    _btnMin = new QPushButton("min");
-    _btnMax = new QPushButton("max");
-    _btnClose = new QPushButton("close");
+    QHBoxLayout *hLayout = new QHBoxLayout(topWidgetContainer);
+    hLayout->setObjectName("topWidgetHLayout");
+    hLayout->setMargin(0);
+    hLayout->setSpacing(10);
+
+    _btnLogo = new QPushButton(topWidgetContainer);
+    _btnSkinBox = new QPushButton(topWidgetContainer);
+    _btnMin = new QPushButton(topWidgetContainer);
+    _btnMax = new QPushButton(topWidgetContainer);
+    _btnClose = new QPushButton(topWidgetContainer);
+    _btnLogo->setObjectName("btnIcon"); 
+    _btnSkinBox->setObjectName("btnSkinBox");
+    _btnMin->setObjectName("btnMini");
+    _btnMax->setObjectName("btnMax");   
+    _btnClose->setObjectName("btnClose");
 
     hLayout->addWidget(_btnLogo);
-
     hLayout->addStretch(1);
-
     hLayout->addWidget(_btnSkinBox);
     hLayout->addWidget(_btnMin);
+
     hLayout->addWidget(_btnMax);
     hLayout->addWidget(_btnClose);
+    hLayout->addSpacing(10);
 
-    hLayout->setMargin(0);
+    QHBoxLayout *hlContainer = new QHBoxLayout(this);
+    hlContainer->setMargin(0);
+    hlContainer->setSpacing(0);
+    hlContainer->addWidget(topWidgetContainer);
+    setLayout(hlContainer);
 
-    setLayout(hLayout);
+    initConnect();
+
+
 }
+
+void TopWidget::initConnect()
+{
+    connect(_btnClose,&QPushButton::clicked,[](){
+        MainWindowHandle::getInstance().close();
+    });
+
+    connect(_btnMax,&QPushButton::clicked,[](){
+        MainWindowHandle::getInstance().max();
+    });
+
+    connect(_btnMin,&QPushButton::clicked,[](){
+        MainWindowHandle::getInstance().min();
+    });
+
+}
+
+
+
+
+
+
+
+
+

@@ -11,27 +11,39 @@
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
 {
-    //this->setWindowFlags(Qt::FramelessWindowHint);
+    this->setWindowFlags(Qt::FramelessWindowHint);
     this->resize(1022,670);
     setWindowTitle(tr("QQ音乐"));
 
+
     QVBoxLayout* vLayout = new QVBoxLayout();
+    vLayout->setMargin(0);
+    vLayout->setSpacing(0);
 
     _topWidget = new TopWidget();
-    vLayout->addWidget(_topWidget,1);
+    _topWidget->setMinimumHeight(58);
+    //_topWidget->setProperty("margin",0);
+    vLayout->addWidget(_topWidget);
 
     _middleWidget = new MiddleWidget();
-    vLayout->addWidget(_middleWidget,30);
+    //_middleWidget->setStyleSheet("background:gray;");
+    vLayout->addWidget(_middleWidget,1);
+
+
 
     _bottomWidget = new BottomWidget(nullptr,_middleWidget,this);
-    vLayout->addWidget(_bottomWidget,2);
+    _bottomWidget->setMinimumHeight(70);
+    vLayout->addWidget(_bottomWidget);
+
 
     //this->setStyleSheet("background:gray;");
 
-    setLayout(vLayout);
+
 
     MainWindowHandle::getInstance().setHandle(this);
     MainWindowHandle::getInstance().setSkin();
+
+    setLayout(vLayout);
 
 }
 
