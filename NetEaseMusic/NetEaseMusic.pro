@@ -23,6 +23,7 @@ SOURCES += \
     mainwindow.cpp \
     mainwindowhandle.cpp \
     middle_widget.cpp \
+    music_player.cpp \
     phonograph_widget.cpp \
     play_widget.cpp \
     playlist_widget.cpp \
@@ -36,6 +37,7 @@ HEADERS += \
     mainwindow.h \
     mainwindowhandle.h \
     middle_widget.h \
+    music_player.h \
     phonograph_widget.h \
     play_widget.h \
     playlist_widget.h \
@@ -58,3 +60,7 @@ DISTFILES += \
     res/css/black.css \
     res/css/netease-red.css \
     res/css/red.css
+
+
+INCLUDEPATH +="./ffmpeg_4_0_1/include"
+LIBS += -L$$PWD/ffmpeg_4_0_1/lib -lavutil -lavformat -lavcodec -lavdevice -lavfilter -lpostproc -lswresample -lswscale -lSDL2

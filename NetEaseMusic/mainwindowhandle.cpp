@@ -41,7 +41,7 @@ void MainWindowHandle::setSkin(const QString skinName)
     {
         QTextStream textStream(&file);
         QString styleSheet = textStream.readAll();
-        qDebug()<<styleSheet<<endl;
+        //qDebug()<<styleSheet<<endl;
         file.close();
         _mainWinHand->setStyleSheet(styleSheet);
         qDebug()<<"set skin"<<endl;

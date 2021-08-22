@@ -8,6 +8,7 @@ class QWidget;
 class QPushButton;
 class QListWidget;
 class QLabel;
+class QTableWidget;
 QT_END_NAMESPACE
 class PlaylistWidget : public QWidget
 {
@@ -22,10 +23,9 @@ private:
     QPushButton* _btnLocalMusic;
     QPushButton* _btnLikedMusic;
 
-    QWidget* _lhsWidgetContainer;
-    QWidget* _rhsWidgetContainer;
 
-    QListWidget* _playList;
+    //QListWidget* _playList;
+    QTableWidget* _playTable;
 
 
 

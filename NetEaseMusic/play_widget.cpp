@@ -94,9 +94,6 @@ void PlayWidget::init()
     vl->addStretch(1);
     hl->addLayout(vl);
 
-//    QHBoxLayout* hlContainer = new QHBoxLayout(this);
-//    hlContainer->addWidget(_playWidgetContainer);
-
 
     setLayout(hl);
 }

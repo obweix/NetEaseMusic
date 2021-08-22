@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QPropertyAnimation>
 
+#include "music_player.h"
+
 QT_BEGIN_NAMESPACE
 class PlayCtrlWidget;
 class VolumeCtrlWidget;
@@ -15,6 +17,7 @@ class QLabel;
 class MiddleWidget;
 class QPropertyAnimation;
 class MainWindow;
+class MusicPlayer;
 QT_END_NAMESPACE
 
 /**

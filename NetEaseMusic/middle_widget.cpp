@@ -20,7 +20,7 @@ void MiddleWidget::init()
     hl->setMargin(0);
     hl->setSpacing(0);
     _playlistWidget = new PlaylistWidget(this);
-    _playlistWidget->setObjectName("playlistWidget");
+    _playlistWidget->setStyleSheet("background-color:gray");
     _playWidget = new PlayWidget(this);
     _playWidget->setObjectName("playWidget");
 

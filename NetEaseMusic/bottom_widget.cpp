@@ -5,12 +5,19 @@
 #include "mainwindowhandle.h"
 #include "mainwindow.h"
 
+
 #include <QPushButton>
 #include <QSlider>
 #include <QtWidgets>
 
 #include<QtDebug>
 
+AVFormatContext* MusicPlayer::_pFormatCtx = nullptr;
+AVCodecContext* MusicPlayer::_pCodecCtx = nullptr;
+AVPacketQueue MusicPlayer::_playQueue;
+AVFrame* MusicPlayer::_pWantedFrame = nullptr;
+int MusicPlayer::_volume = 128;
+int MusicPlayer::_audioIndex = -1;
 
 //////////////////////////////////////////////////////
 /// PlayCtrlWidget
@@ -19,6 +26,8 @@
 PlayCtrlWidget::PlayCtrlWidget(QWidget *parent):QWidget(parent)
 {
     init();
+
+
 }
 
 void PlayCtrlWidget::init()
@@ -87,6 +96,14 @@ void PlayCtrlWidget::init()
     vl->addLayout(hlProgressBar);
 
     setLayout(vl);
+
+    connect(_btnPauseOrPlay,&QPushButton::clicked,[](){
+        MusicPlayer::getSingleton().init("D:/CloudMusic/还是要幸福.mp3");
+
+        MusicPlayer::getSingleton().threadProducePacketBegin();
+
+        MusicPlayer::getSingleton().play();
+    });
 
 }
 
