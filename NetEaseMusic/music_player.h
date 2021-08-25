@@ -34,6 +34,7 @@ extern "C"
 #include <queue>
 #include <condition_variable>
 #include <atomic>
+#include <memory>
 
 
 template <class T>
@@ -55,13 +56,13 @@ public:
 
     }
 
-    std::shared_ptr<T> waitAndPop()
+    T waitAndPop()
     {
         std::lock_guard<std::mutex> lk(_mutex);
         _dataCond.wait(lk,[this]{return !_queue.empty();});
-        std::shared_ptr<T> sp(std::make_shared<T>(_queue.front()));
+        T t = _queue.front();
         _queue.pop();
-        return sp;
+        return t;
 
     }
 
@@ -77,6 +78,16 @@ public:
         return t;
     }
 
+    void clear()
+    {
+        std::lock_guard<std::mutex> lk(_mutex);
+        while(!_queue.empty())
+        {
+            _queue.pop();
+        }
+
+    }
+
 public:
     std::queue<T> _queue;
 
@@ -86,10 +97,7 @@ private:
     std::mutex _mutex;
 };
 
-class AVPacketQueue:public ThreadSafeQueueTemp<AVPacket>
-{
-
-};
+class AVPacketQueue:public ThreadSafeQueueTemp<AVPacket>{};
 
 
 class MusicPlayer
@@ -104,7 +112,7 @@ public:
 
     MusicPlayer& operator=(const MusicPlayer& musicPlayer)=delete ;
 
-    void init(std::string path);       // todo: 中文字符问题
+    void openMusicFile(std::string path);       // todo: 中文字符问题
 
     void play();
 
@@ -130,11 +138,15 @@ public:
 
     static int _audioIndex;
 
+    void initSDL();
+
 
 private:
     MusicPlayer();
 
     void producePakcet();
+
+
 
     static int decode(uint8_t* audio_buf);
 
@@ -143,7 +155,7 @@ private:
 
 private:
 
-    std::string _path;
+    std::string _musicFilePath;
 
 
     AVCodec* _pCodec;
@@ -178,8 +190,11 @@ private:
     {
         PLAYING,
         SEEK,   // 调整播放进度
-        FINISH
+        FINISH,
+        PAUSE
     };
+
+    std::mutex _mtxStatus;
     PlayStatus _status = FINISH;
 
 

@@ -98,10 +98,24 @@ void PlayCtrlWidget::init()
     setLayout(vl);
 
     connect(_btnPauseOrPlay,&QPushButton::clicked,[](){
-        MusicPlayer::getSingleton().init("D:/CloudMusic/还是要幸福.mp3");
+        //MusicPlayer::getSingleton().initSDL();
+
+        MusicPlayer::getSingleton().openMusicFile("D:/CloudMusic/田馥甄 - 还是要幸福.mp3");
 
         MusicPlayer::getSingleton().threadProducePacketBegin();
 
+        MusicPlayer::getSingleton().play();
+    });
+
+    connect(_btnNextSong, &QPushButton::clicked,[](){
+        //MusicPlayer::getSingleton().init("D:/CloudMusic/田馥甄 - 还是要幸福.mp3");
+
+        //MusicPlayer::getSingleton().threadProducePacketBegin();
+
+        MusicPlayer::getSingleton().nextSong();
+    });
+
+    connect(_btnPrevSong,&QPushButton::clicked,[](){
         MusicPlayer::getSingleton().play();
     });
 

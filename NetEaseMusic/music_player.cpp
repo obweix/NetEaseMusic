@@ -5,13 +5,20 @@
 
 MusicPlayer::MusicPlayer()
 {
-
+    initSDL();
 }
 
-
-void MusicPlayer::init(std::string path)
+void MusicPlayer::initSDL()
 {
-    if(path.empty())
+    if(SDL_Init(SDL_INIT_AUDIO))
+    {
+        qDebug()<<"Could not initialize SDL:"<<SDL_GetError()<<endl;
+    }
+}
+
+void MusicPlayer::openMusicFile(std::string path)
+{
+    if(path.empty() || path == _musicFilePath)
         return;
 
     qDebug()<<"song path:"<<path.c_str()<<endl;
@@ -61,10 +68,7 @@ void MusicPlayer::init(std::string path)
 
     _pOutBuffer = (uint8_t*)av_malloc(MAX_AUDIO_FRAME_SIZE*2);
 
-    if(SDL_Init(SDL_INIT_AUDIO))
-    {
-        qDebug()<<"Could not initialize SDL:"<<SDL_GetError()<<endl;
-    }
+//init sdl before below code;
 
     _wantedSpec.freq = _outSampleRate;
     _wantedSpec.format = AUDIO_S16SYS;
@@ -85,8 +89,13 @@ void MusicPlayer::init(std::string path)
     _pWantedFrame->sample_rate = _outSampleRate;
     _pWantedFrame->channels = _outChannels;
 
+    _musicFilePath = path;
+    _playQueue.clear();
 
 }
+
+
+
 void MusicPlayer::threadProducePacketBegin()
 {
     _threadProducePacket = std::thread(std::mem_fn(&MusicPlayer::producePakcet),this);
@@ -94,12 +103,21 @@ void MusicPlayer::threadProducePacketBegin()
 
 void MusicPlayer::producePakcet()
 {
+    std::unique_lock<std::mutex> lk(_mtxStatus);
     _status = PLAYING;
+    lk.unlock();
+
+
     AVPacket avPacket;
 
     while(_aIsPlaying.load())
     {
-        switch (_status)
+        PlayStatus playStatus;
+        std::unique_lock<std::mutex> lk(_mtxStatus);
+        playStatus = _status;
+        lk.unlock();
+
+        switch (playStatus)
         {
         case PLAYING:
         {
@@ -108,7 +126,7 @@ void MusicPlayer::producePakcet()
             {
                 if(avPacket.stream_index == _audioIndex)
                 {
-                    qDebug()<<"produce"<<endl;
+                    //qDebug()<<"produce"<<endl;
                     _playQueue.push(avPacket);
                 }
                 else
@@ -142,6 +160,12 @@ void MusicPlayer::producePakcet()
             break;
         }
 
+        case PAUSE:
+        {
+            SDL_Delay(1000);
+            break;
+        }
+
         case FINISH:
         {
             _aIsPlaying.store(false);
@@ -167,7 +191,7 @@ void MusicPlayer::fillAudio(void* udata,Uint8* stream,int len)
         {
             audio_buf_size = decode(audio_buff);
             if(audio_buf_size < 0){
-                qDebug()<<"audio_buf_size < 0"<<endl;
+                //qDebug()<<"audio_buf_size < 0"<<endl;
                 return;
             }
             audio_buf_pos = 0;
@@ -182,7 +206,6 @@ void MusicPlayer::fillAudio(void* udata,Uint8* stream,int len)
         audio_buf_pos += audio_len;
         stream += audio_len;
     }
-    qDebug()<<"len<0"<<endl;
 }
 
 int MusicPlayer::decode(uint8_t* audio_buf)
@@ -214,7 +237,7 @@ int MusicPlayer::decode(uint8_t* audio_buf)
         {
             pFrame = av_frame_alloc();
             int gotFrame;
-            int len = avcodec_decode_audio4(_pCodecCtx,pFrame,&gotFrame,&avPacket); // todo: 强制转换是否合理？
+            int len = avcodec_decode_audio4(_pCodecCtx,pFrame,&gotFrame,&avPacket);
 
             if(len < 0)   break;
 
@@ -277,15 +300,48 @@ void MusicPlayer::play()
 
     //Play
     SDL_PauseAudio(0);
+
+    std::unique_lock<std::mutex> lk(_mtxStatus);
+    _status = PLAYING;
+    lk.unlock();
 }
 
 void MusicPlayer::stop()
 {
+    SDL_PauseAudio(1);
 
+    std::unique_lock<std::mutex> lk(_mtxStatus);
+    _status = PAUSE;
+    lk.unlock();
 }
 
 void MusicPlayer::nextSong()
 {
+    stop();
+
+    SDL_CloseAudio();
+
+
+    _aIsPlaying.store(false);
+    if(_threadProducePacket.joinable())
+        _threadProducePacket.join();
+
+
+    avformat_free_context(_pFormatCtx);
+    _pFormatCtx = nullptr;
+
+    _pCodec = nullptr;
+    _pCodecCtx = nullptr;
+    _playQueue.clear();
+    _pWantedFrame = nullptr;
+    _audioIndex = -1;
+
+
+    openMusicFile("D:/CloudMusic/test.mp3");
+
+    threadProducePacketBegin();
+
+    play();
 
 }
 
