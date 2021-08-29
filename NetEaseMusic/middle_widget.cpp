@@ -35,7 +35,6 @@ void MiddleWidget::init()
     setLayout(hl);
 
     _playlistWidget->hide();
-
 }
 
 PlayWidget* MiddleWidget::getPlayWidget()

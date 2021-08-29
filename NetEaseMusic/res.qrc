@@ -137,5 +137,6 @@
         <file>res/css/red.css</file>
         <file>res/test/test.txt</file>
         <file>res/css/black.css</file>
+        <file>res/txt/music_file_path.txt</file>
     </qresource>
 </RCC>

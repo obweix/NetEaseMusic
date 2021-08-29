@@ -1,4 +1,5 @@
 #include "playlist_widget.h"
+#include "music_player.h"
 #include <QtWidgets>
 
 PlaylistWidget::PlaylistWidget(QWidget *parent) : QWidget(parent)
@@ -32,7 +33,10 @@ void PlaylistWidget::init()
     vLayout->addWidget(_btnLikedMusic);
     vLayout->addStretch(1);
 
-    _playTable = new QTableWidget(100,5,this);
+
+    _vSongPath = MusicPlayer::getSingleton().getMusicFilePath();
+
+    _playTable = new QTableWidget(_vSongPath.size(),5,this);
     QStringList tableHeadList;
     tableHeadList.push_back(tr("音乐标题"));
     tableHeadList.push_back(tr("歌手"));
@@ -40,15 +44,33 @@ void PlaylistWidget::init()
     tableHeadList.push_back(tr("时长"));
     tableHeadList.push_back(tr("大小"));
     _playTable->setHorizontalHeaderLabels(tableHeadList);
+    _playTable->horizontalHeader()->setStretchLastSection(true);
+    _playTable->verticalHeader()->setVisible(false);
+    _playTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 
+    for (int i = 0; i != _vSongPath.size(); i++) {
+        _playTable->setRowHeight(i,24);
 
+        QString songName;
+        QString singer;
+        QString spName;
+        spName = _vSongPath[i].split("/").last();
+        singer = spName.split("-").first();
+        songName = spName.split("-").last().split(".").first();
+
+        QTableWidgetItem *itemTitle = new QTableWidgetItem(songName);
+        QTableWidgetItem *iterSinger = new QTableWidgetItem(singer);
+        _playTable->setItem(i,0,itemTitle);
+        _playTable->setItem(i,1,iterSinger);
+    }
 
     hlPlayList->addWidget(_playTable,Qt::AlignHCenter);
-
-    //stackedLayout->setAlignment(Qt::AlignCenter);
-
 
     hLayout->addLayout(vLayout,0);
     hLayout->addLayout(hlPlayList,1);
     setLayout(hLayout);
+
+    connect(_playTable,&QTableWidget::itemDoubleClicked,[=](QTableWidgetItem *item){
+        MusicPlayer::getSingleton().play(_vSongPath[item->row()].toStdString());
+    });
 }

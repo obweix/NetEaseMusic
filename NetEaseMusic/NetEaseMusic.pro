@@ -59,7 +59,8 @@ RESOURCES += \
 DISTFILES += \
     res/css/black.css \
     res/css/netease-red.css \
-    res/css/red.css
+    res/css/red.css \
+    res/txt/music_file_path.txt
 
 
 INCLUDEPATH +="./ffmpeg_4_0_1/include"

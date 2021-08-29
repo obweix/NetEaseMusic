@@ -12,12 +12,15 @@
 
 #include<QtDebug>
 
+#define DEFAULT_VOLUME 32
+
 AVFormatContext* MusicPlayer::_pFormatCtx = nullptr;
 AVCodecContext* MusicPlayer::_pCodecCtx = nullptr;
 AVPacketQueue MusicPlayer::_playQueue;
 AVFrame* MusicPlayer::_pWantedFrame = nullptr;
-int MusicPlayer::_volume = 128;
+int MusicPlayer::_volume = DEFAULT_VOLUME;
 int MusicPlayer::_audioIndex = -1;
+int64_t MusicPlayer::_progress = 0;
 
 //////////////////////////////////////////////////////
 /// PlayCtrlWidget
@@ -26,7 +29,6 @@ int MusicPlayer::_audioIndex = -1;
 PlayCtrlWidget::PlayCtrlWidget(QWidget *parent):QWidget(parent)
 {
     init();
-
 
 }
 
@@ -43,11 +45,8 @@ void PlayCtrlWidget::init()
     _btnPauseOrPlay->setObjectName("btnPlayOrPause");
     _btnNextSong->setObjectName("btnNextSong");
 
-//    _btnPrevSong->setMaximumWidth(32);
-//    _btnPauseOrPlay->setMaximumWidth(40);
-//    _btnNextSong->setMaximumWidth(32);
-
     _sldProgressBar = new QSlider(Qt::Horizontal);
+    _sldProgressBar->setRange(0,1000);
     _sldProgressBar->setStyleSheet(
                 "QSlider{"
                     "background: #cccccc;"
@@ -75,8 +74,8 @@ void PlayCtrlWidget::init()
                     "background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,stop:0.3 #CC0033, stop:0.45 #fefefe);"
                 "}"
                 );
-    _lbCurrentProgress = new QLabel("02:12");
-    _lbSongLength = new QLabel("04:28");
+    _lbCurrentProgress = new QLabel("00:00");
+    _lbSongLength = new QLabel("00:00");
 
 
 
@@ -97,32 +96,85 @@ void PlayCtrlWidget::init()
 
     setLayout(vl);
 
-    connect(_btnPauseOrPlay,&QPushButton::clicked,[](){
+
+    connect(_btnPauseOrPlay,&QPushButton::clicked,[=](){
         //MusicPlayer::getSingleton().initSDL();
 
-        MusicPlayer::getSingleton().openMusicFile("D:/CloudMusic/田馥甄 - 还是要幸福.mp3");
+        MusicPlayer::getSingleton().play("D:/CloudMusic/田馥甄 - 还是要幸福.mp3");
 
-        MusicPlayer::getSingleton().threadProducePacketBegin();
-
-        MusicPlayer::getSingleton().play();
+        setTime2Label(_lbSongLength,MusicPlayer::getSingleton().getSongLength());
     });
 
-    connect(_btnNextSong, &QPushButton::clicked,[](){
-        //MusicPlayer::getSingleton().init("D:/CloudMusic/田馥甄 - 还是要幸福.mp3");
-
-        //MusicPlayer::getSingleton().threadProducePacketBegin();
-
-        MusicPlayer::getSingleton().nextSong();
+    connect(_btnNextSong, &QPushButton::clicked,[=](){
+        MusicPlayer::getSingleton().play("D:/CloudMusic/test.mp3");
+        setTime2Label(_lbSongLength,MusicPlayer::getSingleton().getSongLength());
     });
 
     connect(_btnPrevSong,&QPushButton::clicked,[](){
-        MusicPlayer::getSingleton().play();
+        MusicPlayer::getSingleton().fastForwardOrBack(50000);
+    });
+
+    connect(_sldProgressBar,&QSlider::sliderPressed,this,&PlayCtrlWidget::onSliderPressed);
+    connect(_sldProgressBar,&QSlider::sliderReleased,this,&PlayCtrlWidget::onSliderReleased);
+    connect(_sldProgressBar,&QSlider::sliderMoved,this,&PlayCtrlWidget::onSliderMove);
+    //connect(_sldProgressBar,&QSlider::valueChanged,this,&PlayCtrlWidget::onSliderValueChange);
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalProgressChanged,this,&PlayCtrlWidget::slotPositionChanged);
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalSongLen,[=](qint64 len){
+        setTime2Label(_lbSongLength,len);
     });
 
 }
 
+void PlayCtrlWidget::slotPositionChanged(qint64 progress)
+{
+    //qDebug()<<"progress:"<<progress<<endl;
+    setTime2Label(_lbCurrentProgress,progress);
+
+    if(!_sliderPressed){
+         _sldProgressBar->setValue(1.0 * progress / MusicPlayer::getSingleton().getSongLength() * 1000);
+    }
+
+}
+
+ void PlayCtrlWidget::setTime2Label(QLabel* label,qint64 time)
+ {
+     time = time / 1000;    // transform ms to s.
+
+     qint64 sec = time % 60;
+     qint64 min = time /60;
+
+     QString s;
+     s.sprintf("%.2lld:%.2lld",min,sec);
+     label->setText(s);
+ }
+
+  void PlayCtrlWidget::onSliderPressed()
+  {
+      _sliderPressed = true;
+  }
+
+ void PlayCtrlWidget::onSliderReleased()
+ {
+     qint64 songLen = MusicPlayer::getSingleton().getSongLength();
+
+     MusicPlayer::getSingleton().seek(_posSeek2 * songLen / 1000);
+
+     _sliderPressed = false;
+ }
+
+ void PlayCtrlWidget::onSliderMove(int value)
+ {
+     _posSeek2 = value;
+ }
+
+
+
+
+
 //////////////////////////////////////////////////////
-/// VolumeCtrlWidget
+/// class VolumeCtrlWidget
 //////////////////////////////////////////////////////
 
 VolumeCtrlWidget::VolumeCtrlWidget(QWidget *parent):QWidget(parent)
@@ -151,6 +203,8 @@ void VolumeCtrlWidget::init()
                             "}"
                             "");
     _sldVolume = new QSlider(Qt::Horizontal);
+    _sldVolume->setRange(0,128);
+    _sldVolume->setValue(DEFAULT_VOLUME);
     _sldVolume->setStyleSheet(
                 "QSlider{"
                     "background: #cccccc;"
@@ -183,6 +237,14 @@ void VolumeCtrlWidget::init()
     hl->addWidget(_sldVolume);
 
     setLayout(hl);
+
+    connect(_sldVolume,&QSlider::sliderMoved,this,&VolumeCtrlWidget::onSliderMove);
+    connect(_sldVolume,&QSlider::valueChanged,this,&VolumeCtrlWidget::onSliderMove);
+}
+
+void VolumeCtrlWidget::onSliderMove(int value)
+{
+    MusicPlayer::getSingleton().setVolume(value);
 }
 
 ////////////////////////////////////////////////
@@ -204,8 +266,8 @@ void AlbumWidget::init()
     QVBoxLayout* vl = new QVBoxLayout();
     QHBoxLayout* hl = new QHBoxLayout();
 
-    _lbSongName  = new QLabel("my love");
-    _lbSingerName = new QLabel("田馥甄");
+    _lbSongName  = new QLabel();
+    _lbSingerName = new QLabel();
     _btnAlbumCover = new QPushButton("cover");
     _btnAlbumCover->setObjectName("btnAlbumCover");
 
@@ -233,6 +295,14 @@ void AlbumWidget::initConnect()
             _isShowPlaylist = true;
         }
 
+    });
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalCurSinger,[&](QString singer){
+        _lbSingerName->setText(singer);
+    });
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalCurSongName,[&](QString songName){
+        _lbSongName->setText(songName);
     });
 }
 

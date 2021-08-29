@@ -1,11 +1,19 @@
 #include "music_player.h"
 #include <QDebug>
+#include <QDir>
+#include <QTextCodec>
+
 
 #define MAX_AUDIO_FRAME_SIZE 192000 // 1 second of 48khz 32bit audio
 
-MusicPlayer::MusicPlayer()
+MusicPlayer::MusicPlayer(QObject* parent):QObject(parent)
 {
     initSDL();
+
+    _aIsPlaying.store(true);
+
+    // test
+    scanDir();
 }
 
 void MusicPlayer::initSDL()
@@ -98,6 +106,7 @@ void MusicPlayer::openMusicFile(std::string path)
 
 void MusicPlayer::threadProducePacketBegin()
 {
+    _aIsPlaying.store(true);
     _threadProducePacket = std::thread(std::mem_fn(&MusicPlayer::producePakcet),this);
 }
 
@@ -153,9 +162,12 @@ void MusicPlayer::producePakcet()
             if(-1 != _audioIndex)
             {
                 avcodec_flush_buffers(_pCodecCtx);
+                _playQueue.clear();
             }
 
+            std::unique_lock<std::mutex> lk(_mtxStatus);
             _status = PLAYING;
+            lk.unlock();
 
             break;
         }
@@ -219,7 +231,7 @@ int MusicPlayer::decode(uint8_t* audio_buf)
     auto avPacket = _playQueue.tryPop();
     if(0 == avPacket.size)
     {
-        qDebug()<<"Play queue is empty."<<endl;
+        //qDebug()<<"Play queue is empty."<<endl;
         return ret;
     }
 
@@ -232,6 +244,9 @@ int MusicPlayer::decode(uint8_t* audio_buf)
 
         AVRational avRational = {1,1000};
         qint64 res = av_rescale_q(avPacket.pts,_pFormatCtx->streams[_audioIndex]->time_base,avRational);
+
+        _progress = res;
+        MusicPlayer::getSingleton().emitProgressChange(_progress);
 
         if(avPacket.size > 0)
         {
@@ -294,9 +309,14 @@ int MusicPlayer::decode(uint8_t* audio_buf)
     return ret;
 }
 
+void MusicPlayer::emitProgressChange(qint64 value)
+{
+    emit signalProgressChanged(value);
+}
+
 void MusicPlayer::play()
 {
-    _aIsPlaying.store(true);
+    //_aIsPlaying.store(true);
 
     //Play
     SDL_PauseAudio(0);
@@ -315,8 +335,12 @@ void MusicPlayer::stop()
     lk.unlock();
 }
 
-void MusicPlayer::nextSong()
+
+void MusicPlayer::play(std::string path)
 {
+    if(path.empty() || path == _musicFilePath)
+        return;
+
     stop();
 
     SDL_CloseAudio();
@@ -327,22 +351,46 @@ void MusicPlayer::nextSong()
         _threadProducePacket.join();
 
 
-    avformat_free_context(_pFormatCtx);
-    _pFormatCtx = nullptr;
+    if(nullptr != _pFormatCtx)
+    {
+        avformat_free_context(_pFormatCtx);
+        _pFormatCtx = nullptr;
+    }
 
-    _pCodec = nullptr;
+    _pCodec = nullptr;  // todo: 检查是否存在内存泄漏
     _pCodecCtx = nullptr;
     _playQueue.clear();
     _pWantedFrame = nullptr;
     _audioIndex = -1;
 
 
-    openMusicFile("D:/CloudMusic/test.mp3");
+    openMusicFile(path);
 
     threadProducePacketBegin();
 
     play();
 
+    qint64 songLen = getSongLength();
+    emit signalSongLen(songLen);
+
+    initSongNameAndSinger(path,_curSongName,_curSinger);
+
+}
+
+int MusicPlayer::getVolume()
+{
+    return _volume;
+}
+
+void MusicPlayer::setVolume(int v)
+{
+    if(v < 0)
+    {
+        _volume = 0;
+        return;
+    }
+
+    _volume = v > 128 ? 128 : v;
 }
 
 void MusicPlayer::preSong()
@@ -350,14 +398,153 @@ void MusicPlayer::preSong()
 
 }
 
+int64_t MusicPlayer::getSongLength()
+{
+    return _pFormatCtx->duration / 1000; // 单位：毫秒
+}
+
+void MusicPlayer::fastForwardOrBack(int64_t millisecond)
+{
+    int64_t songLength = _pFormatCtx->duration / 1000; // 单位：毫秒
+
+    int64_t afterSeekProgress;
+    afterSeekProgress = _progress + millisecond;
+
+    if(afterSeekProgress > songLength)
+    {
+        _progress = songLength;
+        _millisecondSeek  = _progress;
+    }
+    else if(afterSeekProgress < 0)
+    {
+        _progress = 0;
+        _millisecondSeek = _progress;
+    }
+    else{
+        _progress = afterSeekProgress;
+        _millisecondSeek = afterSeekProgress;
+    }
+
+    qDebug()<<"song length:"<<songLength<<",seek to:"<<_millisecondSeek<<endl;
 
 
+    std::unique_lock<std::mutex> lk(_mtxStatus);
+    _status = SEEK;
+    lk.unlock();
+
+}
+
+void MusicPlayer::seek(int64_t millisecond)
+{
+    if(millisecond < 0)
+    {
+        _progress = 0;
+        _millisecondSeek = 0;
+
+        std::unique_lock<std::mutex> lk(_mtxStatus);
+        _status = SEEK;
+        lk.unlock();
+
+        return;
+    }
+
+    int64_t songLength = _pFormatCtx->duration / 1000; // 单位：毫秒
+
+    _progress = millisecond > songLength ? songLength : millisecond;
+    _millisecondSeek = _progress;
+
+    std::unique_lock<std::mutex> lk(_mtxStatus);
+    _status = SEEK;
+    lk.unlock();
+}
+
+void MusicPlayer::mute()
+{
+    _volumeBeforeMute = _volume;
+    _volume = 0;
+}
+
+void MusicPlayer::unMute()
+{
+    _volume = _volumeBeforeMute;
+}
 
 
+void MusicPlayer::scanDir(QString path)
+{
+    QDir musicDir(path);
+    musicDir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks); // todo:扫描整个文件夹
+    QStringList filters;
+    filters << "*.mp3" << "*.wma" << "*.aac"<<"*.wav"<<"*.ape"<<"*.flac"<<"*.ogg";
+    musicDir.setNameFilters(filters);
 
+    musicDir.setSorting(QDir::Size | QDir::Reversed);
 
+    if(!musicDir.exists())
+        return;
 
+    //QFile musicPathFile(QString(":/res/txt/music_file_path.txt"));
+    QFile musicPathFile(QString("music_file_path.txt"));
 
+    if(!musicPathFile.open(QFile::ReadWrite | QIODevice::Truncate))
+    {
+        qDebug()<<"open music path file error."<<endl;
+        return;
+    }
+    QTextStream fileStream(&musicPathFile);
+    fileStream.setAutoDetectUnicode(true);
+    fileStream.setCodec("UTF-8");
+
+    QFileInfoList musicList = musicDir.entryInfoList();
+    for (int i = 0; i < musicList.size(); ++i) {
+            QFileInfo fileInfo = musicList.at(i);
+//            qDebug()<<fileInfo.absoluteFilePath();
+//            qDebug() << endl;
+            fileStream<<fileInfo.absoluteFilePath();
+            fileStream<< endl;
+    }
+    musicPathFile.close();
+}
+
+QVector<QString> MusicPlayer::getMusicFilePath()
+{
+    QVector<QString> vString;
+
+    QFile musicPathFile(QString("music_file_path.txt"));
+    if(!musicPathFile.exists())
+    {
+        scanDir();
+    }
+    if(!musicPathFile.open(QFile::ReadOnly | QFile::Text))
+    {
+        qDebug()<<"open music path file error."<<endl;
+        return vString;
+    }
+
+    QTextStream stream(&musicPathFile);
+    stream.setAutoDetectUnicode(true);
+    stream.setCodec("UTF-8");
+
+    //stream.readLine();
+    while (!stream.atEnd()) {
+        vString.push_back(stream.readLine());
+    }
+
+    musicPathFile.close();
+
+    return vString;
+}
+
+    void MusicPlayer::initSongNameAndSinger(std::string path,QString& songName,QString& singer)
+ {
+     QString temp(QString::fromStdString(path).split("/").last());
+     singer = temp.split("-").first();
+     songName = temp.split("-").last().split(".").first();
+
+     emit signalCurSinger(singer.trimmed());
+     emit signalCurSongName(songName.trimmed());
+
+ }
 
 
 

@@ -1,6 +1,7 @@
 #include "play_widget.h"
 #include "phonograph_widget.h"
 #include "image_filter.h"
+#include "music_player.h"
 
 #include <QLabel>
 #include <QtWidgets>
@@ -85,7 +86,7 @@ void PlayWidget::init()
 
     _phnographWidget = new PhonographWidget();
     _songNameTitle = new QLabel(tr("歌曲名:"));
-    _songName = new QLabel(tr("告白气球"));
+    _songName = new QLabel();
 
     hl->addWidget(_phnographWidget);
 
@@ -101,6 +102,9 @@ void PlayWidget::init()
 void PlayWidget::initConnect()
 {
    //connect(calPicThread, &ThreadCalcBackgroundImage::ready, this, &PlayWidget::setNewBackgroundPixmap);
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalCurSongName,[&](QString songName){
+        _songName->setText(songName);
+    });
 }
 
 void PlayWidget::paintEvent(QPaintEvent* event)

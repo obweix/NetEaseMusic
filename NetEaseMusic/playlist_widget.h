@@ -27,6 +27,8 @@ private:
     //QListWidget* _playList;
     QTableWidget* _playTable;
 
+    QVector<QString> _vSongPath;
+
 
 
 signals:

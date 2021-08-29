@@ -32,6 +32,14 @@ public:
 private:
     void init();
 
+    void setTime2Label(QLabel* label,qint64 time);
+
+    void onSliderPressed();
+
+    void onSliderReleased();
+
+    void onSliderMove(int value);
+
 private:
     QPushButton* _btnPrevSong;
     QPushButton* _btnPauseOrPlay;
@@ -44,6 +52,16 @@ private:
 
     QWidget* _playCtrlWidgetContainer;
 
+    int _posSeek2;
+
+    bool _sliderPressed;
+
+public slots:
+
+    // 播放进度改变
+    void slotPositionChanged(qint64 progress);
+
+    //void slotSongLen(qint64 len);
 
 signals:
 
@@ -61,6 +79,8 @@ public:
 
 private:
     void init();
+
+    void onSliderMove(int value);
 
 private:
     QPushButton* _btnMute;
@@ -115,6 +135,7 @@ private:
 
     QPropertyAnimation _animationShowPlayWidget;
     QPropertyAnimation _animationShowPlaylistWidget;
+
 
 };
 

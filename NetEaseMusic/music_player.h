@@ -1,6 +1,8 @@
 #ifndef MUSICPLAYER_H
 #define MUSICPLAYER_H
 
+#include <QObject>
+
 #ifdef _WIN32
 //Windows
 extern "C"
@@ -100,8 +102,10 @@ private:
 class AVPacketQueue:public ThreadSafeQueueTemp<AVPacket>{};
 
 
-class MusicPlayer
+class MusicPlayer : public QObject
 {
+    Q_OBJECT
+
 public:
     static MusicPlayer& getSingleton(){
         static MusicPlayer musicPlayer;
@@ -114,15 +118,62 @@ public:
 
     void openMusicFile(std::string path);       // todo: 中文字符问题
 
+    /**
+     * @brief 暂停后，调用后从暂停位置播放
+     */
     void play();
 
-    void stop();
+    /**
+     * @brief 播放指定路径下的音乐
+     * @param path 音乐文件所在路径和文件名
+     */
+    void play(std::string path);
 
-    void nextSong();
+    /**
+     * @brief 暂停播放，调用play()恢复播放
+     */
+    void stop();
 
     void preSong();
 
     void threadProducePacketBegin();
+
+    int getVolume();
+
+    /**
+     * @brief 设置音量
+     * @param v 范围 0~128
+     */
+    void setVolume(int v);
+
+    void mute();
+
+    void unMute();
+
+    int64_t getSongLength();
+
+    /**
+     * @brief  进或快退
+     * @param millisecond 正数为快进，负数为快退
+     */
+    void fastForwardOrBack(int64_t millisecond);
+
+    /**
+     * @brief 跳转到指定进度
+     * @param millisecond 进度 大于0
+     */
+    void seek(int64_t millisecond);
+
+    /**
+     * @brief 扫描path下音乐文件
+     * @param path 文件夹绝对路径
+     */
+    void scanDir(QString path = "D:/CloudMusic");
+
+    /**
+     * @brief 逐行读取音乐文件路径
+     */
+    QVector<QString> getMusicFilePath();
 
 
 public:
@@ -142,15 +193,17 @@ public:
 
 
 private:
-    MusicPlayer();
+    MusicPlayer(QObject* parent = nullptr);
 
     void producePakcet();
-
-
 
     static int decode(uint8_t* audio_buf);
 
     static void fillAudio(void* udata,Uint8* stream,int len);
+
+    void emitProgressChange(qint64 value);
+
+    void initSongNameAndSinger(std::string path,QString& songName,QString& singer);
 
 
 private:
@@ -159,8 +212,6 @@ private:
 
 
     AVCodec* _pCodec;
-
-
 
 
     //Out Audio Param
@@ -184,7 +235,7 @@ private:
 
     uint64_t _millisecondSeek;  // 跳转到某一播放进度
 
-    uint64_t _progress;         // 播放进度
+    static int64_t _progress;         // 播放进度(毫秒)
 
     enum PlayStatus
     {
@@ -197,6 +248,19 @@ private:
     std::mutex _mtxStatus;
     PlayStatus _status = FINISH;
 
+    int _volumeBeforeMute;
+
+    QString _curSongName;
+    QString _curSinger;
+
+signals:
+    void signalProgressChanged(qint64);
+
+    void signalSongLen(qint64);
+
+    void signalCurSongName(QString);
+
+    void signalCurSinger(QString);
 
 };
 
