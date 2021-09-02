@@ -6,6 +6,7 @@
 QT_BEGIN_NAMESPACE
 class PlaylistWidget;
 class PlayWidget;
+class play_table_widget;
 QT_END_NAMESPACE
 
 
@@ -24,6 +25,8 @@ private:
 private:
     PlaylistWidget* _playlistWidget;
     PlayWidget* _playWidget;
+
+    play_table_widget* _playTableWidget;
 
 };
 

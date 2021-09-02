@@ -12,9 +12,6 @@ void PlaylistWidget::init()
     QHBoxLayout *hLayout = new QHBoxLayout();
     QHBoxLayout *hlPlayList = new QHBoxLayout();
     QVBoxLayout *vLayout = new QVBoxLayout();
-    QStackedLayout *stackedLayout = new QStackedLayout();
-    stackedLayout->setSpacing(0);
-    stackedLayout->setMargin(0);
     hLayout->setMargin(0);
     hLayout->setSpacing(0);
     vLayout->setMargin(0);
@@ -31,11 +28,10 @@ void PlaylistWidget::init()
     _btnLikedMusic->setMinimumWidth(200);
     vLayout->addWidget(_btnLocalMusic);
     vLayout->addWidget(_btnLikedMusic);
-    vLayout->addStretch(1);
+    //vLayout->addStretch(1);
 
 
     _vSongPath = MusicPlayer::getSingleton().getMusicFilePath();
-
     _playTable = new QTableWidget(_vSongPath.size(),5,this);
     QStringList tableHeadList;
     tableHeadList.push_back(tr("音乐标题"));
@@ -47,6 +43,7 @@ void PlaylistWidget::init()
     _playTable->horizontalHeader()->setStretchLastSection(true);
     _playTable->verticalHeader()->setVisible(false);
     _playTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+
 
     for (int i = 0; i != _vSongPath.size(); i++) {
         _playTable->setRowHeight(i,24);
@@ -64,9 +61,9 @@ void PlaylistWidget::init()
         _playTable->setItem(i,1,iterSinger);
     }
 
-    hlPlayList->addWidget(_playTable,Qt::AlignHCenter);
+    hlPlayList->addWidget(_playTable,1,Qt::AlignHCenter);
 
-    hLayout->addLayout(vLayout,0);
+    //hLayout->addLayout(vLayout,0);
     hLayout->addLayout(hlPlayList,1);
     setLayout(hLayout);
 

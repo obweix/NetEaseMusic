@@ -25,6 +25,7 @@ SOURCES += \
     middle_widget.cpp \
     music_player.cpp \
     phonograph_widget.cpp \
+    play_table_widget.cpp \
     play_widget.cpp \
     playlist_widget.cpp \
     skin_config.cpp \
@@ -39,13 +40,15 @@ HEADERS += \
     middle_widget.h \
     music_player.h \
     phonograph_widget.h \
+    play_table_widget.h \
     play_widget.h \
     playlist_widget.h \
     skin_config.h \
     top_widget.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    play_table_widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

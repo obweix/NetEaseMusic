@@ -356,7 +356,7 @@ void AlbumWidget::showPlaylistWidget()
 
     moveWidget(_animationShowPlaylistWidget,_playWidget,from,to);
 
-    _playlistWidget->show();
+    //_playlistWidget->show();
 }
 
 
