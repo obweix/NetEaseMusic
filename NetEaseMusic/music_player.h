@@ -38,6 +38,8 @@ extern "C"
 #include <atomic>
 #include <memory>
 
+#define DEFAULT_MUSIC_PATH "D:/CloudMusic"
+
 
 template <class T>
 class ThreadSafeQueueTemp
@@ -119,7 +121,7 @@ public:
     void openMusicFile(std::string path);       // todo: 中文字符问题
 
     /**
-     * @brief 暂停后，调用后从暂停位置播放
+     * @brief 暂停后，从暂停位置播放
      */
     void play();
 
@@ -130,11 +132,19 @@ public:
     void play(std::string path);
 
     /**
+     * @brief 根据歌曲在列表中的序号播放
+     * @param index 歌曲序号
+     */
+    void play(uint64_t index);
+
+    /**
      * @brief 暂停播放，调用play()恢复播放
      */
     void stop();
 
     void preSong();
+
+    void nextSong();
 
     void threadProducePacketBegin();
 
@@ -152,6 +162,8 @@ public:
 
     int64_t getSongLength();
 
+    int64_t getPlayingSongIndex();
+
     /**
      * @brief  进或快退
      * @param millisecond 正数为快进，负数为快退
@@ -168,13 +180,16 @@ public:
      * @brief 扫描path下音乐文件
      * @param path 文件夹绝对路径
      */
-    void scanDir(QString path = "D:/CloudMusic");
+    void scanDir(QString path = DEFAULT_MUSIC_PATH);
 
     /**
      * @brief 逐行读取音乐文件路径
      */
     QVector<QString> getMusicFilePath();
 
+    bool isPlaying();
+
+    bool isPause();
 
 public:
     static AVFormatContext* _pFormatCtx;
@@ -189,7 +204,7 @@ public:
 
     static int _audioIndex;
 
-    void initSDL();
+
 
 
 private:
@@ -205,14 +220,18 @@ private:
 
     void initSongNameAndSinger(std::string path,QString& songName,QString& singer);
 
+    void initSDL();
+
 
 private:
 
-    std::string _musicFilePath;
 
+    std::string _musicFilePath;     // 当前播放歌曲的路径
+    QVector<QString> _vSongPath;    // 歌曲路径列表
+    uint64_t _songNum;              // 歌曲数量
+    uint64_t _playingSongIndex;     // 对应_vSongPath；当前播放歌曲的索引
 
     AVCodec* _pCodec;
-
 
     //Out Audio Param
     uint64_t _outChannelLayout;
@@ -261,6 +280,8 @@ signals:
     void signalCurSongName(QString);
 
     void signalCurSinger(QString);
+
+    void signalSongPathVectorUpdate(); // 重新扫描文件夹后，通知界面更新
 
 };
 

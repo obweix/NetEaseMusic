@@ -14,6 +14,8 @@ MusicPlayer::MusicPlayer(QObject* parent):QObject(parent)
 
     // test
     scanDir();
+
+    _playingSongIndex = 0;
 }
 
 void MusicPlayer::initSDL()
@@ -231,7 +233,9 @@ int MusicPlayer::decode(uint8_t* audio_buf)
     auto avPacket = _playQueue.tryPop();
     if(0 == avPacket.size)
     {
-        //qDebug()<<"Play queue is empty."<<endl;
+        qDebug()<<"Play queue is empty."<<endl;
+        // 一首结束，马上播放下一首
+        MusicPlayer::getSingleton().nextSong();
         return ret;
     }
 
@@ -247,6 +251,7 @@ int MusicPlayer::decode(uint8_t* audio_buf)
 
         _progress = res;
         MusicPlayer::getSingleton().emitProgressChange(_progress);
+
 
         if(avPacket.size > 0)
         {
@@ -314,6 +319,15 @@ void MusicPlayer::emitProgressChange(qint64 value)
     emit signalProgressChanged(value);
 }
 
+void MusicPlayer::stop()
+{
+    SDL_PauseAudio(1);
+
+    std::unique_lock<std::mutex> lk(_mtxStatus);
+    _status = PAUSE;
+    lk.unlock();
+}
+
 void MusicPlayer::play()
 {
     //_aIsPlaying.store(true);
@@ -325,16 +339,6 @@ void MusicPlayer::play()
     _status = PLAYING;
     lk.unlock();
 }
-
-void MusicPlayer::stop()
-{
-    SDL_PauseAudio(1);
-
-    std::unique_lock<std::mutex> lk(_mtxStatus);
-    _status = PAUSE;
-    lk.unlock();
-}
-
 
 void MusicPlayer::play(std::string path)
 {
@@ -377,6 +381,16 @@ void MusicPlayer::play(std::string path)
 
 }
 
+void MusicPlayer::play(uint64_t index)
+{
+    if(_vSongPath.empty())
+    {
+        return;
+    }
+    play(_vSongPath[index].toStdString());
+    _playingSongIndex = index;
+}
+
 int MusicPlayer::getVolume()
 {
     return _volume;
@@ -395,12 +409,25 @@ void MusicPlayer::setVolume(int v)
 
 void MusicPlayer::preSong()
 {
+    _playingSongIndex = (_playingSongIndex + _songNum - 1) % _songNum;
+    play(_playingSongIndex);
+}
 
+void MusicPlayer::nextSong()
+{
+    _playingSongIndex = (_playingSongIndex + 1) % _songNum;
+    qDebug()<<"next song index:"<<_playingSongIndex<<endl;
+    play(_playingSongIndex);
 }
 
 int64_t MusicPlayer::getSongLength()
 {
     return _pFormatCtx->duration / 1000; // 单位：毫秒
+}
+
+int64_t MusicPlayer::getPlayingSongIndex()
+{
+    return _playingSongIndex;
 }
 
 void MusicPlayer::fastForwardOrBack(int64_t millisecond)
@@ -498,8 +525,6 @@ void MusicPlayer::scanDir(QString path)
     QFileInfoList musicList = musicDir.entryInfoList();
     for (int i = 0; i < musicList.size(); ++i) {
             QFileInfo fileInfo = musicList.at(i);
-//            qDebug()<<fileInfo.absoluteFilePath();
-//            qDebug() << endl;
             fileStream<<fileInfo.absoluteFilePath();
             fileStream<< endl;
     }
@@ -508,7 +533,7 @@ void MusicPlayer::scanDir(QString path)
 
 QVector<QString> MusicPlayer::getMusicFilePath()
 {
-    QVector<QString> vString;
+    _vSongPath.clear();
 
     QFile musicPathFile(QString("music_file_path.txt"));
     if(!musicPathFile.exists())
@@ -518,7 +543,7 @@ QVector<QString> MusicPlayer::getMusicFilePath()
     if(!musicPathFile.open(QFile::ReadOnly | QFile::Text))
     {
         qDebug()<<"open music path file error."<<endl;
-        return vString;
+        return _vSongPath;
     }
 
     QTextStream stream(&musicPathFile);
@@ -527,15 +552,38 @@ QVector<QString> MusicPlayer::getMusicFilePath()
 
     //stream.readLine();
     while (!stream.atEnd()) {
-        vString.push_back(stream.readLine());
+        _vSongPath.push_back(stream.readLine());
     }
 
     musicPathFile.close();
 
-    return vString;
+    _songNum = _vSongPath.size();
+    return _vSongPath;
 }
 
-    void MusicPlayer::initSongNameAndSinger(std::string path,QString& songName,QString& singer)
+bool MusicPlayer::isPlaying()
+{
+    bool isPlaying = false;
+    std::unique_lock<std::mutex> lk(_mtxStatus);
+    if(_status == PLAYING){
+       isPlaying = true;
+    }
+    lk.unlock();
+    return isPlaying;
+}
+
+bool MusicPlayer::isPause()
+{
+    bool isPause = false;
+    std::unique_lock<std::mutex> lk(_mtxStatus);
+    if(_status == PAUSE){
+       isPause = true;
+    }
+    lk.unlock();
+    return isPause;
+}
+
+void MusicPlayer::initSongNameAndSinger(std::string path,QString& songName,QString& singer)
  {
      QString temp(QString::fromStdString(path).split("/").last());
      singer = temp.split("-").first();

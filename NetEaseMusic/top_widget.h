@@ -17,6 +17,16 @@ private:
     void init();
     void initConnect();
 
+protected:
+       void mousePressEvent(QMouseEvent *event);
+       void mouseMoveEvent(QMouseEvent *event);
+       void mouseReleaseEvent(QMouseEvent *event);
+
+       /**
+        * @brief 双击全屏显示
+        */
+       void mouseDoubleClickEvent(QMouseEvent *event);
+
 private:
     QPushButton* _btnLogo;
 
@@ -27,8 +37,12 @@ private:
     QPushButton* _btnMax;
     QPushButton* _btnClose;
 
+    // 移动窗口的变量;
+    bool _isPressed;
+    QPoint _startMovePos;
 
-
+    // 区分当前窗口是否为最大
+    bool _isMax;
 
 
 signals:

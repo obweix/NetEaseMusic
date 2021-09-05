@@ -19,6 +19,11 @@ private:
     Ui::play_table_widget *ui;
 
     QVector<QString> _vSongPath;
+
+    /**
+     * @brief 根据扫描到的文件列表初始化table控件
+     */
+    void initTable();
 };
 
 #endif // PLAY_TABLE_WIDGET_H

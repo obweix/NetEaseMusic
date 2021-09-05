@@ -18,6 +18,7 @@ class MiddleWidget;
 class QPropertyAnimation;
 class MainWindow;
 class MusicPlayer;
+class play_table_widget;
 QT_END_NAMESPACE
 
 /**
@@ -55,6 +56,9 @@ private:
     int _posSeek2;
 
     bool _sliderPressed;
+
+    MusicPlayer& _musicPlayer = MusicPlayer::getSingleton();
+
 
 public slots:
 
@@ -126,9 +130,7 @@ private:
     MainWindow* _mainWindowHandle;
 
     PlayWidget* _playWidget;
-    PlaylistWidget* _playlistWidget;
-
-
+    play_table_widget* _playTableWidget;
 
 
     bool _isShowPlaylist;

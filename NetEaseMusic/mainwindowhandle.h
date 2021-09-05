@@ -21,6 +21,8 @@ public:
 
     void min();
 
+    void resize();
+
 private:
     MainWindow* _mainWinHand;
 

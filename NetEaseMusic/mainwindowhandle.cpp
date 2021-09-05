@@ -47,16 +47,16 @@ void MainWindowHandle::setSkin(const QString skinName)
         qDebug()<<"set skin"<<endl;
     }
 
-    QFile testfile(QString(":/res/txt/music_file_path.txt"));
-    if(!testfile.exists())
-        return;
-    if(!testfile.open(QIODevice::ReadOnly | QIODevice::Text))
-        return;
-    QTextStream stream(&testfile);
-    stream.setAutoDetectUnicode(true);
-    stream.setCodec("UTF-8");
-    //qDebug()<<stream.readAll();
-    testfile.close();
+//    QFile testfile(QString(":/res/txt/music_file_path.txt"));
+//    if(!testfile.exists())
+//        return;
+//    if(!testfile.open(QIODevice::ReadOnly | QIODevice::Text))
+//        return;
+//    QTextStream stream(&testfile);
+//    stream.setAutoDetectUnicode(true);
+//    stream.setCodec("UTF-8");
+//    qDebug()<<stream.readAll();
+//    testfile.close();
 
 }
 
@@ -68,14 +68,10 @@ void MainWindowHandle::close()
 void MainWindowHandle::max()
 {
     if(_isMax){
-        //_mainWinHand->resize(1022,670);
         _mainWinHand->showNormal();
         _isMax = false;
     }else{
         _mainWinHand->showMaximized();
-
-//        QRect availableGeometry(QGuiApplication::screens().first()->availableGeometry());
-//        _mainWinHand->setGeometry(availableGeometry);
         _isMax = true;
     }
 
@@ -89,4 +85,9 @@ void MainWindowHandle::min()
 
     _mainWinHand->showMinimized();
 
+}
+
+void MainWindowHandle::resize()
+{
+    _mainWinHand->resize(1022,670);
 }

@@ -2,22 +2,22 @@
 #include "ui_play_table_widget.h"
 #include "music_player.h"
 
+#include<QFileDialog>
+
 play_table_widget::play_table_widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::play_table_widget)
 {
     ui->setupUi(this);
 
-    //this->setStyleSheet("background:#434343;");
-
-    _vSongPath = MusicPlayer::getSingleton().getMusicFilePath();
-
-    ui->btn_scan_music->setStyleSheet("text-align:left");
-    ui->btn_local_music->setStyleSheet("text-align:left");
 
 
-    //ui->tableWidget->setColumnCount(5);
-    ui->tableWidget->setRowCount(_vSongPath.size());
+    ui->btn_scan_music->setStyleSheet("text-align:left;"
+                                      "color:white;"
+                                      " margin-left: 10px;");
+
+    ui->lb_save_dir->setStyleSheet("background-color:#2b2b2b;");
+    ui->lb_save_dir->setText(QString(tr("储存目录：")) + DEFAULT_MUSIC_PATH);
 
     //设置列数和列宽
     int width = 1920;
@@ -36,7 +36,6 @@ play_table_widget::play_table_widget(QWidget *parent) :
     tableHeadList.push_back(tr("时长"));
     tableHeadList.push_back(tr("大小"));
 
-
     ui->tableWidget->setHorizontalHeaderLabels(tableHeadList);
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -45,25 +44,7 @@ play_table_widget::play_table_widget(QWidget *parent) :
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidget->verticalHeader()->setVisible(false);
 
-
-
-    for (int i = 0; i != _vSongPath.size(); i++) {
-        ui->tableWidget->setRowHeight(i,24);
-
-        QString songName;
-        QString singer;
-        QString spName;
-        spName = _vSongPath[i].split("/").last();
-        singer = spName.split("-").first();
-        songName = spName.split("-").last().split(".").first();
-
-        QTableWidgetItem *itemTitle = new QTableWidgetItem(songName);
-        QTableWidgetItem *iterSinger = new QTableWidgetItem(singer);
-        itemTitle->setTextAlignment(Qt::AlignLeft);
-        iterSinger->setTextAlignment(Qt::AlignLeft);
-        ui->tableWidget->setItem(i,0,itemTitle);
-        ui->tableWidget->setItem(i,1,iterSinger);
-    }
+    initTable();
 
     ui->tableWidget->setStyleSheet(
                 "QHeaderView{"
@@ -87,9 +68,42 @@ play_table_widget::play_table_widget(QWidget *parent) :
 
 
     connect(ui->tableWidget,&QTableWidget::itemDoubleClicked,[=](QTableWidgetItem *item){
-        MusicPlayer::getSingleton().play(_vSongPath[item->row()].toStdString());
+        MusicPlayer::getSingleton().play(item->row());
     });
 
+    // 选择文件夹并扫描
+    connect(ui->btn_scan_music,&QPushButton::clicked,[&]{
+        QString path = QFileDialog::getExistingDirectory();
+        MusicPlayer::getSingleton().scanDir(path);
+        ui->tableWidget->clearContents();
+        ui->tableWidget->setRowCount(0);
+        ui->lb_save_dir->setText(QString(tr("储存目录：")) + path);
+        initTable();
+    });
+
+}
+
+void play_table_widget::initTable()
+{
+    _vSongPath = MusicPlayer::getSingleton().getMusicFilePath();
+    ui->tableWidget->setRowCount(_vSongPath.size());
+    for (int i = 0; i != _vSongPath.size(); i++) {
+        ui->tableWidget->setRowHeight(i,24);
+
+        QString songName;
+        QString singer;
+        QString spName;
+        spName = _vSongPath[i].split("/").last();
+        singer = spName.split("-").first();
+        songName = spName.split("-").last().split(".").first();
+
+        QTableWidgetItem *itemTitle = new QTableWidgetItem(songName);
+        QTableWidgetItem *iterSinger = new QTableWidgetItem(singer);
+        itemTitle->setTextAlignment(Qt::AlignLeft);
+        iterSinger->setTextAlignment(Qt::AlignLeft);
+        ui->tableWidget->setItem(i,0,itemTitle);
+        ui->tableWidget->setItem(i,1,iterSinger);
+    }
 }
 
 play_table_widget::~play_table_widget()

@@ -27,7 +27,6 @@ SOURCES += \
     phonograph_widget.cpp \
     play_table_widget.cpp \
     play_widget.cpp \
-    playlist_widget.cpp \
     skin_config.cpp \
     top_widget.cpp
 
@@ -42,12 +41,10 @@ HEADERS += \
     phonograph_widget.h \
     play_table_widget.h \
     play_widget.h \
-    playlist_widget.h \
     skin_config.h \
     top_widget.h
 
 FORMS += \
-    mainwindow.ui \
     play_table_widget.ui
 
 # Default rules for deployment.

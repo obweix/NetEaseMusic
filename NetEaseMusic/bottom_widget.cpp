@@ -1,9 +1,9 @@
 #include "bottom_widget.h"
 #include "play_widget.h"
-#include "playlist_widget.h"
 #include "middle_widget.h"
 #include "mainwindowhandle.h"
 #include "mainwindow.h"
+#include "play_table_widget.h"
 
 
 #include <QPushButton>
@@ -29,7 +29,6 @@ int64_t MusicPlayer::_progress = 0;
 PlayCtrlWidget::PlayCtrlWidget(QWidget *parent):QWidget(parent)
 {
     init();
-
 }
 
 void PlayCtrlWidget::init()
@@ -78,7 +77,6 @@ void PlayCtrlWidget::init()
     _lbSongLength = new QLabel("00:00");
 
 
-
     hlCtrlBtn->addStretch(1);
     hlCtrlBtn->addWidget(_btnPrevSong);
     hlCtrlBtn->addWidget(_btnPauseOrPlay);
@@ -96,28 +94,31 @@ void PlayCtrlWidget::init()
 
     setLayout(vl);
 
+    connect(_btnPauseOrPlay,&QPushButton::clicked,[&](){
+        if(_musicPlayer.isPlaying()){
+            _musicPlayer.stop();
+            return;
+        }
 
-    connect(_btnPauseOrPlay,&QPushButton::clicked,[=](){
-        //MusicPlayer::getSingleton().initSDL();
+        if(_musicPlayer.isPause()){
+            _musicPlayer.play();
+        }
 
-        MusicPlayer::getSingleton().play("D:/CloudMusic/田馥甄 - 还是要幸福.mp3");
-
-        setTime2Label(_lbSongLength,MusicPlayer::getSingleton().getSongLength());
+        int64_t index = _musicPlayer.getPlayingSongIndex();
+        _musicPlayer.play(index);
     });
 
-    connect(_btnNextSong, &QPushButton::clicked,[=](){
-        MusicPlayer::getSingleton().play("D:/CloudMusic/test.mp3");
-        setTime2Label(_lbSongLength,MusicPlayer::getSingleton().getSongLength());
+    connect(_btnNextSong, &QPushButton::clicked,[&](){
+        _musicPlayer.nextSong();
     });
 
-    connect(_btnPrevSong,&QPushButton::clicked,[](){
-        MusicPlayer::getSingleton().fastForwardOrBack(50000);
+    connect(_btnPrevSong,&QPushButton::clicked,[&](){
+        _musicPlayer.preSong();
     });
 
     connect(_sldProgressBar,&QSlider::sliderPressed,this,&PlayCtrlWidget::onSliderPressed);
     connect(_sldProgressBar,&QSlider::sliderReleased,this,&PlayCtrlWidget::onSliderReleased);
     connect(_sldProgressBar,&QSlider::sliderMoved,this,&PlayCtrlWidget::onSliderMove);
-    //connect(_sldProgressBar,&QSlider::valueChanged,this,&PlayCtrlWidget::onSliderValueChange);
 
     connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalProgressChanged,this,&PlayCtrlWidget::slotPositionChanged);
 
@@ -253,7 +254,7 @@ void VolumeCtrlWidget::onSliderMove(int value)
 AlbumWidget::AlbumWidget(QWidget *parent,MiddleWidget *mdiileWidgetHandle,MainWindow* mainWindowHandle) : QWidget(parent),_middleWidgetHandle(mdiileWidgetHandle),_mainWindowHandle(mainWindowHandle)
 {
     _playWidget = _middleWidgetHandle->getPlayWidget();
-    _playlistWidget = _middleWidgetHandle->getPlaylistWidget();
+    _playTableWidget = _middleWidgetHandle->getTableWidget();
 
     _isShowPlaylist = false;
 
@@ -304,6 +305,16 @@ void AlbumWidget::initConnect()
     connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalCurSongName,[&](QString songName){
         _lbSongName->setText(songName);
     });
+
+
+    connect(&_animationShowPlayWidget,&QPropertyAnimation::finished,[&](){
+        _middleWidgetHandle->setCurrentIndex(1);
+    });
+
+    connect(&_animationShowPlaylistWidget,&QPropertyAnimation::finished,[&](){
+        _middleWidgetHandle->setCurrentIndex(0);
+        _playTableWidget->raise();
+    });
 }
 
 void AlbumWidget::moveWidget(QPropertyAnimation& animation,
@@ -321,9 +332,6 @@ void AlbumWidget::moveWidget(QPropertyAnimation& animation,
 
 void AlbumWidget::showPlayWidget()
 {
-    _playWidget->show();
-    //_playWidget->raise();
-
     QPoint gp;
     gp = _btnAlbumCover->mapTo(_mainWindowHandle,QPoint(0,0));
     QRect from(gp.x(),gp.y(),_btnAlbumCover->width(),_btnAlbumCover->height());
@@ -337,7 +345,10 @@ void AlbumWidget::showPlayWidget()
     qDebug()<<"1to:"<<to.x()<<to.y()<<to.width()<<to.height();
 
 
+    _playWidget->raise();
     moveWidget(_animationShowPlayWidget,_playWidget,from,to);
+
+
 }
 
 void AlbumWidget::showPlaylistWidget()
@@ -354,9 +365,11 @@ void AlbumWidget::showPlaylistWidget()
     qDebug()<<"2from:"<<from.x()<<from.y()<<from.width()<<from.height();
     qDebug()<<"2to:"<<to.x()<<to.y()<<to.width()<<to.height();
 
+
     moveWidget(_animationShowPlaylistWidget,_playWidget,from,to);
 
-    //_playlistWidget->show();
+
+
 }
 
 

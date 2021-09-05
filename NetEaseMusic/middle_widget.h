@@ -4,9 +4,10 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
-class PlaylistWidget;
+//class PlaylistWidget;
 class PlayWidget;
 class play_table_widget;
+class QStackedLayout;
 QT_END_NAMESPACE
 
 
@@ -17,16 +18,21 @@ public:
     explicit MiddleWidget(QWidget *parent=nullptr);
 
     PlayWidget* getPlayWidget();
-    PlaylistWidget* getPlaylistWidget();
+    //PlaylistWidget* getPlaylistWidget();
+    play_table_widget* getTableWidget();
+
+    void setCurrentIndex(int i);
 
 private:
     void init();
 
 private:
-    PlaylistWidget* _playlistWidget;
+    //PlaylistWidget* _playlistWidget;
     PlayWidget* _playWidget;
 
     play_table_widget* _playTableWidget;
+
+    QStackedLayout* _sl;
 
 };
 

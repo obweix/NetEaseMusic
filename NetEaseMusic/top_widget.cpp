@@ -4,6 +4,7 @@
 
 TopWidget::TopWidget(QWidget *parent) : QWidget(parent)
 {
+    _isMax = false;
     init();
 }
 
@@ -54,17 +55,60 @@ void TopWidget::initConnect()
         MainWindowHandle::getInstance().close();
     });
 
-    connect(_btnMax,&QPushButton::clicked,[](){
+    connect(_btnMax,&QPushButton::clicked,[&](){
         MainWindowHandle::getInstance().max();
+        _isMax = !_isMax;
     });
 
-    connect(_btnMin,&QPushButton::clicked,[](){
+    connect(_btnMin,&QPushButton::clicked,[&](){
         MainWindowHandle::getInstance().min();
+        _isMax = false;
     });
 
 }
 
 
+void TopWidget::mousePressEvent(QMouseEvent *event)
+{
+    if(_isMax)
+    {
+        return;
+    }
+
+    _startMovePos = event->globalPos();
+    _isPressed = true;
+
+    return QWidget::mousePressEvent(event);
+}
+
+void TopWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if(_isPressed)
+    {
+        QPoint movePoint = event->globalPos() - _startMovePos;
+        QPoint widgetPos = this->parentWidget()->pos();
+        _startMovePos = event->globalPos();
+        this->parentWidget()->move(widgetPos.x() + movePoint.x(), widgetPos.y() + movePoint.y());
+
+    }
+    return QWidget::mouseMoveEvent(event);
+}
+
+void TopWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    _isPressed = false;
+
+    return QWidget::mouseReleaseEvent(event);
+}
+
+
+void TopWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    MainWindowHandle::getInstance().max();
+    _isMax = !_isMax;
+
+    return QWidget::mouseDoubleClickEvent(event);
+}
 
 
 
