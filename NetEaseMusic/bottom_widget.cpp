@@ -97,11 +97,13 @@ void PlayCtrlWidget::init()
     connect(_btnPauseOrPlay,&QPushButton::clicked,[&](){
         if(_musicPlayer.isPlaying()){
             _musicPlayer.stop();
+
             return;
         }
 
         if(_musicPlayer.isPause()){
             _musicPlayer.play();
+
         }
 
         int64_t index = _musicPlayer.getPlayingSongIndex();
@@ -111,6 +113,12 @@ void PlayCtrlWidget::init()
     connect(_btnNextSong, &QPushButton::clicked,[&](){
         _musicPlayer.nextSong();
     });
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalNextSong,[&](){
+        qDebug()<<"next song."<<endl;
+        _musicPlayer.nextSong();
+    });
+
 
     connect(_btnPrevSong,&QPushButton::clicked,[&](){
         _musicPlayer.preSong();
@@ -124,6 +132,14 @@ void PlayCtrlWidget::init()
 
     connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalSongLen,[=](qint64 len){
         setTime2Label(_lbSongLength,len);
+    });
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalIsPause,[&](){
+         _btnPauseOrPlay->setStyleSheet("background-image:url(\":/res/image/btn_play.png\");");
+    });
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalIsPlaying,[&](){
+        _btnPauseOrPlay->setStyleSheet("background-image:url(\":/res/image/btn_pause.png\");");
     });
 
 }

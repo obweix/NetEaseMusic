@@ -16,6 +16,7 @@ MusicPlayer::MusicPlayer(QObject* parent):QObject(parent)
     scanDir();
 
     _playingSongIndex = 0;
+
 }
 
 void MusicPlayer::initSDL()
@@ -87,6 +88,8 @@ void MusicPlayer::openMusicFile(std::string path)
     _wantedSpec.samples = _outNbSamples;
     _wantedSpec.size = _outBufferSize;
     _wantedSpec.callback = fillAudio;
+
+    //SDL_CloseAudio();
 
     if(SDL_OpenAudio(&_wantedSpec,nullptr)<0)
     {
@@ -205,7 +208,8 @@ void MusicPlayer::fillAudio(void* udata,Uint8* stream,int len)
         {
             audio_buf_size = decode(audio_buff);
             if(audio_buf_size < 0){
-                //qDebug()<<"audio_buf_size < 0"<<endl;
+                qDebug()<<"audio_buf_size < 0"<<endl;
+                MusicPlayer::getSingleton().emitNextSong();
                 return;
             }
             audio_buf_pos = 0;
@@ -235,7 +239,8 @@ int MusicPlayer::decode(uint8_t* audio_buf)
     {
         qDebug()<<"Play queue is empty."<<endl;
         // 一首结束，马上播放下一首
-        MusicPlayer::getSingleton().nextSong();
+        //SDL_CloseAudio();
+
         return ret;
     }
 
@@ -319,6 +324,11 @@ void MusicPlayer::emitProgressChange(qint64 value)
     emit signalProgressChanged(value);
 }
 
+ void MusicPlayer::emitNextSong()
+ {
+     emit signalNextSong();
+ }
+
 void MusicPlayer::stop()
 {
     SDL_PauseAudio(1);
@@ -326,6 +336,8 @@ void MusicPlayer::stop()
     std::unique_lock<std::mutex> lk(_mtxStatus);
     _status = PAUSE;
     lk.unlock();
+
+    emit signalIsPause();
 }
 
 void MusicPlayer::play()
@@ -338,22 +350,25 @@ void MusicPlayer::play()
     std::unique_lock<std::mutex> lk(_mtxStatus);
     _status = PLAYING;
     lk.unlock();
+
+    emit signalIsPlaying();
 }
 
 void MusicPlayer::play(std::string path)
 {
+    qDebug()<<"3-----------------"<<endl;
     if(path.empty() || path == _musicFilePath)
         return;
 
     stop();
-
-    SDL_CloseAudio();
-
+    emit signalIsPause();
 
     _aIsPlaying.store(false);
-    if(_threadProducePacket.joinable())
+    if(_threadProducePacket.joinable()){
         _threadProducePacket.join();
-
+    }else{
+        qDebug()<<"thread join fial."<<endl;
+    }
 
     if(nullptr != _pFormatCtx)
     {
@@ -378,6 +393,7 @@ void MusicPlayer::play(std::string path)
     emit signalSongLen(songLen);
 
     initSongNameAndSinger(path,_curSongName,_curSinger);
+    emit signalIsPlaying();
 
 }
 
@@ -387,6 +403,8 @@ void MusicPlayer::play(uint64_t index)
     {
         return;
     }
+    //qDebug()<<_vSongPath[index]<<endl;
+
     play(_vSongPath[index].toStdString());
     _playingSongIndex = index;
 }

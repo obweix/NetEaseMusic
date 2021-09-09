@@ -1,4 +1,5 @@
 #include "phonograph_widget.h"
+#include "music_player.h"
 #include <QPainter>
 #include<QTimer>
 
@@ -26,6 +27,14 @@ PhonographWidget::PhonographWidget(QWidget *parent):QWidget(parent),
     connect(_timerArm, &QTimer::timeout, this, &PhonographWidget::updateAngleOfArm);
 
     initPaintingData(true);
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalIsPause,[&](){
+         stop();
+    });
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalIsPlaying,[&](){
+       play();
+    });
 }
 
 void PhonographWidget::initPaintingData(bool firstTime)

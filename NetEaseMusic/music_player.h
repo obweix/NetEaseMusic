@@ -110,7 +110,7 @@ class MusicPlayer : public QObject
 
 public:
     static MusicPlayer& getSingleton(){
-        static MusicPlayer musicPlayer;
+        static MusicPlayer musicPlayer;       
         return musicPlayer;
     }
 
@@ -218,6 +218,8 @@ private:
 
     void emitProgressChange(qint64 value);
 
+    void emitNextSong();
+
     void initSongNameAndSinger(std::string path,QString& songName,QString& singer);
 
     void initSDL();
@@ -282,6 +284,12 @@ signals:
     void signalCurSinger(QString);
 
     void signalSongPathVectorUpdate(); // 重新扫描文件夹后，通知界面更新
+
+    void signalNextSong();
+
+    void signalIsPlaying();
+
+    void signalIsPause();
 
 };
 
