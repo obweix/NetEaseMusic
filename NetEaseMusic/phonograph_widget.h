@@ -13,15 +13,15 @@ class PhonographWidget : public QWidget
 public:
    explicit PhonographWidget(QWidget *parent = nullptr);
 
-    void setAlbumCover(QPixmap cover);      //设置专辑封面
+    void setAlbumCover(QPixmap cover);
 
-    void play();                            //播放
+    void play();
 
-    void stop();                            //暂停
+    void stop();
 
-    bool isPlaying();                       //查询是否在播放
+    bool isPlaying();
 
-    void setBackgroundColor();              //设置背景颜色
+    void setBackgroundColor();
 
 
 protected:
@@ -29,19 +29,19 @@ protected:
 
 protected:
 
-    QTimer* _timerDisk;              //唱片转动定时器
-    QTimer* _timerArm;               //唱臂转动定时器
+    QTimer* _timerDisk;
+    QTimer* _timerArm;
 
-    int _YoffsetOfDisk;              //唱片y方向上离上边缘的偏移量
-    int _maxAngleOfArm;              //唱臂最大旋转的角度
-    int _currentDiskAngle;           //唱片的角度在0~360之间,这里为了便于避免不必要的浮点计算误差（这里每一帧角度要小于1度），单位为0.1度
+    int _YoffsetOfDisk;
+    int _maxAngleOfArm;
+    int _currentDiskAngle;
     int _currentArmAngle;
 
-    bool _isPlaying;                   //是否正在播放
+    bool _isPlaying;
 
-    QPixmap _albumCover;             //专辑封面
-    QPixmap _disk;                   //唱片
-    QPixmap _toneArm;                //唱臂
+    QPixmap _albumCover;
+    QPixmap _disk;
+    QPixmap _toneArm;
 
 private slots:
     void updateAngleOfDisk();

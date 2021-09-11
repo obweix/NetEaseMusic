@@ -118,7 +118,7 @@ QPushButton#btnIcon
         border: 0px; border-radius:0px;
         background-color:rgba(0, 0, 0, 0);
         padding: 0px; margin: 0px;
-        width: 120px; height:30px;
+        width: 124px; height:30px;
         background-image:url(":/res/image/logo.png");
         background-repeat:no-repeat;
 }

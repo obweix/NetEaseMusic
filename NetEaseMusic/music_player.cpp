@@ -12,7 +12,6 @@ MusicPlayer::MusicPlayer(QObject* parent):QObject(parent)
 
     _aIsPlaying.store(true);
 
-    // test
     scanDir();
 
     _playingSongIndex = 0;
@@ -238,7 +237,6 @@ int MusicPlayer::decode(uint8_t* audio_buf)
     if(0 == avPacket.size)
     {
         qDebug()<<"Play queue is empty."<<endl;
-        // 一首结束，马上播放下一首
         //SDL_CloseAudio();
 
         return ret;
@@ -327,6 +325,7 @@ void MusicPlayer::emitProgressChange(qint64 value)
  void MusicPlayer::emitNextSong()
  {
      emit signalNextSong();
+     //SDL_CloseAudio(); todo: 关闭sdl时存在bug
  }
 
 void MusicPlayer::stop()
@@ -356,7 +355,6 @@ void MusicPlayer::play()
 
 void MusicPlayer::play(std::string path)
 {
-    qDebug()<<"3-----------------"<<endl;
     if(path.empty() || path == _musicFilePath)
         return;
 
@@ -403,7 +401,6 @@ void MusicPlayer::play(uint64_t index)
     {
         return;
     }
-    //qDebug()<<_vSongPath[index]<<endl;
 
     play(_vSongPath[index].toStdString());
     _playingSongIndex = index;

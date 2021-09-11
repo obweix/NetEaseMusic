@@ -115,7 +115,6 @@ void PlayCtrlWidget::init()
     });
 
     connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalNextSong,[&](){
-        qDebug()<<"next song."<<endl;
         _musicPlayer.nextSong();
     });
 

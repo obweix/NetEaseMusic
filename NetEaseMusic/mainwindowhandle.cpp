@@ -46,18 +46,6 @@ void MainWindowHandle::setSkin(const QString skinName)
         _mainWinHand->setStyleSheet(styleSheet);
         qDebug()<<"set skin"<<endl;
     }
-
-//    QFile testfile(QString(":/res/txt/music_file_path.txt"));
-//    if(!testfile.exists())
-//        return;
-//    if(!testfile.open(QIODevice::ReadOnly | QIODevice::Text))
-//        return;
-//    QTextStream stream(&testfile);
-//    stream.setAutoDetectUnicode(true);
-//    stream.setCodec("UTF-8");
-//    qDebug()<<stream.readAll();
-//    testfile.close();
-
 }
 
 void MainWindowHandle::close()

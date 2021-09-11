@@ -17,8 +17,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     bottom_widget.cpp \
-    filter.cpp \
-    image_filter.cpp \
     main.cpp \
     mainwindow.cpp \
     mainwindowhandle.cpp \
@@ -32,8 +30,6 @@ SOURCES += \
 
 HEADERS += \
     bottom_widget.h \
-    filter.h \
-    image_filter.h \
     mainwindow.h \
     mainwindowhandle.h \
     middle_widget.h \

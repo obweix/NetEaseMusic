@@ -1,64 +1,9 @@
 #include "play_widget.h"
 #include "phonograph_widget.h"
-#include "image_filter.h"
 #include "music_player.h"
 
 #include <QLabel>
 #include <QtWidgets>
-
-ThreadCalcBackgroundImage::~ThreadCalcBackgroundImage()
-{
-    // 请求终止
-    requestInterruption();
-    quit();
-    wait();
-}
-
-
-void ThreadCalcBackgroundImage::run()
-{
-    // 是否请求终止
-    while (!isInterruptionRequested())
-    {
-        bool bPicFound = false;
-        QPixmap pixmapToDeal;
-
-        {
-            QMutexLocker locker(&_mutex);
-            if(!_vecPic.empty())
-            {
-                bPicFound = true;
-                pixmapToDeal = _vecPic.back();
-                _vecPic.clear();
-            }
-        }
-        // locker超出范围并释放互斥锁
-
-        if(bPicFound)
-        {
-            QPixmap newPixmap = ImageFilter::BlurImage(pixmapToDeal, 50, 80);
-
-            bPicFound = false;
-            {
-                QMutexLocker locker(&_mutex);
-                if(_vecPic.empty())      //在没有新图片需要计算时才发出图片,保证发出的总是最后一次计算
-                    emit(ready(newPixmap));
-            }
-            // locker超出范围并释放互斥锁
-        }
-        else
-            msleep(2000);
-    }
-}
-
-void ThreadCalcBackgroundImage::showPic(QPixmap pic)
-{
-    QMutexLocker locker(&_mutex);
-    _vecPic.push_back(pic);
-}
-
-
-
 
 //////////////////////////////////////////////////////
 /// PlayWidget
@@ -79,8 +24,6 @@ PlayWidget::PlayWidget(QWidget *parent) : QWidget(parent)
 
 void PlayWidget::init()
 {
-    //_playWidgetContainer = new QWidget(this);
-
     QHBoxLayout* hl = new QHBoxLayout();
     QVBoxLayout* vl = new QVBoxLayout();
 
@@ -94,14 +37,11 @@ void PlayWidget::init()
     vl->addWidget(_songName);
     vl->addStretch(1);
     hl->addLayout(vl);
-
-
     setLayout(hl);
 }
 
 void PlayWidget::initConnect()
 {
-   //connect(calPicThread, &ThreadCalcBackgroundImage::ready, this, &PlayWidget::setNewBackgroundPixmap);
     connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalCurSongName,[&](QString songName){
         _songName->setText(songName);
     });
@@ -116,7 +56,5 @@ void PlayWidget::paintEvent(QPaintEvent* event)
 
     painter.drawPixmap(this->rect(),_blurbackgroudImage);
     painter.drawPixmap(this->rect(),_blackMaskImage);
-
-
     QWidget::paintEvent(event);
 }

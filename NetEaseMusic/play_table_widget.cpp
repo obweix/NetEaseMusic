@@ -93,16 +93,25 @@ void play_table_widget::initTable()
         QString songName;
         QString singer;
         QString spName;
+        QString album;
+        QString songLen;
+        QString fileSize;
         spName = _vSongPath[i].split("/").last();
         singer = spName.split("-").first();
         songName = spName.split("-").last().split(".").first();
 
         QTableWidgetItem *itemTitle = new QTableWidgetItem(songName);
-        QTableWidgetItem *iterSinger = new QTableWidgetItem(singer);
+        QTableWidgetItem *itemSinger = new QTableWidgetItem(singer);
+        QTableWidgetItem *itemAlbum = new QTableWidgetItem(album);
+        QTableWidgetItem *itemSongLen = new QTableWidgetItem(songLen);
+        QTableWidgetItem *itemFileSize = new QTableWidgetItem(fileSize);
         itemTitle->setTextAlignment(Qt::AlignLeft);
-        iterSinger->setTextAlignment(Qt::AlignLeft);
+        itemSinger->setTextAlignment(Qt::AlignLeft);
         ui->tableWidget->setItem(i,0,itemTitle);
-        ui->tableWidget->setItem(i,1,iterSinger);
+        ui->tableWidget->setItem(i,1,itemSinger);
+        ui->tableWidget->setItem(i,2,itemAlbum);
+        ui->tableWidget->setItem(i,3,itemSongLen);
+        ui->tableWidget->setItem(i,4,itemFileSize);
     }
 }
 
