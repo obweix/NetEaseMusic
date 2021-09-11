@@ -18,7 +18,6 @@ public:
     explicit MiddleWidget(QWidget *parent=nullptr);
 
     PlayWidget* getPlayWidget();
-    //PlaylistWidget* getPlaylistWidget();
     play_table_widget* getTableWidget();
 
     void setCurrentIndex(int i);
@@ -27,7 +26,6 @@ private:
     void init();
 
 private:
-    //PlaylistWidget* _playlistWidget;
     PlayWidget* _playWidget;
 
     play_table_widget* _playTableWidget;

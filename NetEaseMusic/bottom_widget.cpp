@@ -428,5 +428,4 @@ void BottomWidget::init()
 
     hlContainer->addWidget(bottomWidgetContainer);
     setLayout(hlContainer);
-    //setLayout(hl);
 }

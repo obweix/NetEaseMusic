@@ -15,16 +15,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH +=$$PWD middleWidget
+include(middleWidget/middle_widget.pri)
+
 SOURCES += \
     bottom_widget.cpp \
     main.cpp \
     mainwindow.cpp \
     mainwindowhandle.cpp \
-    middle_widget.cpp \
     music_player.cpp \
-    phonograph_widget.cpp \
-    play_table_widget.cpp \
-    play_widget.cpp \
     skin_config.cpp \
     top_widget.cpp
 
@@ -32,16 +31,11 @@ HEADERS += \
     bottom_widget.h \
     mainwindow.h \
     mainwindowhandle.h \
-    middle_widget.h \
     music_player.h \
-    phonograph_widget.h \
-    play_table_widget.h \
-    play_widget.h \
     skin_config.h \
     top_widget.h
 
-FORMS += \
-    play_table_widget.ui
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
