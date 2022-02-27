@@ -30,12 +30,12 @@ PhonographWidget::PhonographWidget(QWidget *parent):QWidget(parent),
     initPaintingData(true);
 
     connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalIsPause,[&](){
-        qDebug()<<"stop."<<endl;
+        qDebug()<<"stop.,,,,,,"<<endl;
          stop();
     });
 
     connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalIsPlaying,[&](){
-        qDebug()<<"play."<<endl;
+        qDebug()<<"play.,,,,,,,,"<<endl;
        play();
     });
 }

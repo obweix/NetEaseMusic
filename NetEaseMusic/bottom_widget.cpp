@@ -97,13 +97,12 @@ void PlayCtrlWidget::init()
     connect(_btnPauseOrPlay,&QPushButton::clicked,[&](){
         if(_musicPlayer.isPlaying()){
             _musicPlayer.stop();
-
             return;
         }
 
         if(_musicPlayer.isPause()){
             _musicPlayer.play();
-
+            return;
         }
 
         int64_t index = _musicPlayer.getPlayingSongIndex();
@@ -111,10 +110,6 @@ void PlayCtrlWidget::init()
     });
 
     connect(_btnNextSong, &QPushButton::clicked,[&](){
-        _musicPlayer.nextSong();
-    });
-
-    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalNextSong,[&](){
         _musicPlayer.nextSong();
     });
 
@@ -126,6 +121,10 @@ void PlayCtrlWidget::init()
     connect(_sldProgressBar,&QSlider::sliderPressed,this,&PlayCtrlWidget::onSliderPressed);
     connect(_sldProgressBar,&QSlider::sliderReleased,this,&PlayCtrlWidget::onSliderReleased);
     connect(_sldProgressBar,&QSlider::sliderMoved,this,&PlayCtrlWidget::onSliderMove);
+
+    connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalNextSong,[&](){
+        _musicPlayer.nextSong();
+    });
 
     connect(&MusicPlayer::getSingleton(),&MusicPlayer::signalProgressChanged,this,&PlayCtrlWidget::slotPositionChanged);
 

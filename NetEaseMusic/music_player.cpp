@@ -374,7 +374,7 @@ void MusicPlayer::play(std::string path)
         _pFormatCtx = nullptr;
     }
 
-    _pCodec = nullptr;  // todo: 检查是否存在内存泄漏
+    _pCodec = nullptr;
     _pCodecCtx = nullptr;
     _playQueue.clear();
     _pWantedFrame = nullptr;
